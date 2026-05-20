@@ -2,9 +2,9 @@ const cardPools = {
     pool: [
         ["無下限術式.赫","Cursed Technique: Red"],["無下限術式.蒼","Cursed Technique: Blue"],
         ["反轉術式","Reverse Cursed Technique"],["黑閃","Black Flash"],
-        ["死亡回歸","Death Loop"],["火焰","Fire"],
-        ["風","Wind"],["水","Water"],["冰","Ice"],
-        ["One for All","One for All"],
+        ["時間暫停","Time Stop"],["血輪眼","Sharingan"],
+        ["神盾","Divine Shield"],["死靈法術","Necromancy"],
+        ["火焰","Fire"],["風","Wind"],["水","Water"],["冰","Ice"],
     ],
     racePool: [["天使","Angel"],["精靈","Elf"],["人類","Human"],["龍族","Dragon"]],
     WeapenPool: [["炎魔刀","Demon Sword"],["法杖","Staff"],["匕首","Dagger"]],
