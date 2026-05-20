@@ -796,7 +796,8 @@
       // Use native WebSocket (no PartySocket dependency)
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsHost = window.location.hostname === 'localhost' ? 'localhost:3000' : PARTYKT_HOST;
-      const wsUrl = `${wsProtocol}//${wsHost}/?room=${currentRoomCode}&playerId=${currentPlayerId}&playerName=${encodeURIComponent(playerName)}`;
+      const wsPlayerName = document.getElementById('player-name').value || 'Player';
+      const wsUrl = `${wsProtocol}//${wsHost}/?room=${currentRoomCode}&playerId=${currentPlayerId}&playerName=${encodeURIComponent(wsPlayerName)}`;
 
       if (lobbySocket) {
         lobbySocket.close();
