@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { cardPools } from '../data';
+import { cardPools } from './data';
 
 function generateId(): string {
     return Math.random().toString(36).substr(2, 9).toUpperCase();
@@ -20,7 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const playerId = generateId();
-    const { drawHand } = await import('../data');
+    import { drawHand } from './data';
     const hand = drawHand(lang as string);
 
     res.status(200).json({
