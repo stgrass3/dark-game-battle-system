@@ -1,0 +1,13 @@
+{
+  "name": "dark-game-ws-server",
+  "version": "1.0.0",
+  "description": "DARK GAME WebSocket server for multiplayer battles",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "ws": "^8.20.1"
+  }
+}

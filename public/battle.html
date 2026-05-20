@@ -970,17 +970,12 @@
 
     <a href="rules.html" class="rules-link" data-i18n="rules">規則 / RULES</a>
 
-    <script type="module">
-    import('https://esm.sh/partysocket@1.1.19')
-      .then(mod => { window.PartySocket = mod.default || mod.PartySocket; })
-      .catch(e => console.error('PartySocket load failed:', e));
-  </script>
     <script>
         const API_URL = '';
 
-        // PartyKit host — set from query param or default to localhost
+        // Railway WebSocket server — set from query param or default to localhost
         const params = new URLSearchParams(window.location.search);
-        const PARTYKT_HOST = params.get('partyHost') || 'localhost:1999';
+        const WS_HOST = params.get('partyHost') || (window.location.hostname === 'localhost' ? 'localhost:3000' : 'dark-game-ws-server.railway.app');
 
         const i18n = {
             zh: {
@@ -1203,28 +1198,29 @@
         }
 
         function connect() {
-            const isLocal = PARTYKT_HOST.includes('localhost') || PARTYKT_HOST.includes('127.0.0.1');
-            const host = isLocal ? 'localhost:1999' : PARTYKT_HOST;
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${wsProtocol}//${WS_HOST}/?room=${roomCode}&playerId=${playerId}`;
 
-            socket = new PartySocket({ host, room: roomCode, query: { playerId }, reconnect: false });
+            if (socket) socket.close();
+            socket = new WebSocket(wsUrl);
 
-            socket.addEventListener('open', () => {
-                console.log('PartyKit connected');
+            socket.onopen = () => {
+                console.log('WS connected');
                 reconnectAttempts = 0;
                 updateWsStatus('connected');
-            });
+            };
 
-            socket.addEventListener('close', () => {
+            socket.onclose = () => {
                 handleDisconnect();
-            });
+            };
 
-            socket.addEventListener('error', (e) => {
-                console.error('PartyKit error:', e);
-            });
+            socket.onerror = (e) => {
+                console.error('WS error:', e);
+            };
 
-            socket.addEventListener('message', (e) => {
+            socket.onmessage = (e) => {
                 handleMessage(JSON.parse(e.data));
-            });
+            };
         }
 
         function handleDisconnect() {

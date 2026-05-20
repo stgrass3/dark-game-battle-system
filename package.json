@@ -6,11 +6,11 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node src/server.js",
-    "vercel-dev": "vercel dev",
-    "party-dev": "partykit dev"
+    "vercel-dev": "vercel dev"
   },
   "dependencies": {
+    "cors": "^2.8.5",
     "express": "^4.18.2",
-    "cors": "^2.8.5"
+    "ws": "^8.20.1"
   }
 }
