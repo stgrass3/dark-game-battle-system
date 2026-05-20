@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DARK GAME</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&family=Rajdhani:wght@500;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --void-black: #05050a;
+      --abyss: #0a0a12;
+      --shadow: #12121f;
+      --steel: #1a1a2e;
+      --obsidian: #252542;
+      --blood-crimson: #dc2626;
+      --blood-glow: #ef4444;
+      --electric-cyan: #06b6d4;
+      --neon-cyan: #22d3ee;
+      --gold-ember: #f59e0b;
+      --gold-bright: #fbbf24;
+      --soul-purple: #8b5cf6;
+      --void-violet: #a855f7;
+      --ash: #71717a;
+      --smoke: #a1a1aa;
+      --mist: #d4d4d8;
+      --white: #fafafa;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Sans JP', 'Rajdhani', sans-serif;
+      background: var(--void-black);
+      color: var(--mist);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.03) 2px, rgba(0, 0, 0, 0.03) 4px);
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9998;
+      opacity: 0.5;
+    }
+
+    .bg-atmosphere { position: fixed; inset: 0; z-index: -1; overflow: hidden; }
+    .bg-gradient {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 120% 80% at 50% 0%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+        radial-gradient(ellipse 80% 60% at 80% 20%, rgba(220, 38, 38, 0.08) 0%, transparent 40%),
+        radial-gradient(ellipse 60% 50% at 20% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 40%),
+        linear-gradient(180deg, var(--abyss) 0%, var(--void-black) 100%);
+    }
+
+    .floating-particles { position: absolute; inset: 0; overflow: hidden; }
+    .particle {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: var(--soul-purple);
+      border-radius: 50%;
+      opacity: 0.4;
+      animation: float-particle 15s infinite ease-in-out;
+      box-shadow: 0 0 6px var(--soul-purple);
+    }
+
+    @keyframes float-particle {
+      0%, 100% { transform: translateY(100vh) translateX(0); opacity: 0; }
+      10% { opacity: 0.6; }
+      90% { opacity: 0.6; }
+      100% { transform: translateY(-10vh) translateX(50px); opacity: 0; }
+    }
+
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(5, 5, 10, 0.95) 0%, rgba(5, 5, 10, 0) 100%);
+    }
+
+    .nav-logo {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      background: linear-gradient(135deg, var(--blood-crimson), var(--gold-ember));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 30px rgba(220, 38, 38, 0.5);
+    }
+
+    .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+
+    .nav-link {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ash);
+      text-decoration: none;
+      padding: 0.6rem 1.2rem;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-link:hover { color: var(--white); border-color: var(--soul-purple); box-shadow: 0 0 20px rgba(139, 92, 246, 0.3); }
+
+    .lang-toggle {
+      display: flex;
+      border: 1px solid var(--obsidian);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-left: 15px;
+    }
+
+    .lang-btn {
+      padding: 8px 14px;
+      background: transparent;
+      border: none;
+      color: var(--ash);
+      cursor: pointer;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      transition: all 0.3s ease;
+    }
+
+    .lang-btn.active { background: linear-gradient(135deg, var(--soul-purple), #7c3aed); color: #fff; }
+    .lang-btn:hover:not(.active) { color: #fff; background: rgba(139, 92, 246, 0.2); }
+
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .hero-title {
+      font-family: 'Orbitron', monospace;
+      font-size: clamp(3rem, 12vw, 8rem);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      line-height: 1;
+      margin-bottom: 1rem;
+      position: relative;
+    }
+
+    .hero-title-draw { display: inline-block; animation: glitch-text 3s infinite; }
+
+    .hero-title-draw span {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--white) 0%, var(--blood-crimson) 50%, var(--gold-ember) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 30px rgba(220, 38, 38, 0.6));
+    }
+
+    .hero-title-dark { display: inline-block; margin-left: 0.1em; }
+
+    .hero-title-dark span {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--void-violet) 0%, var(--soul-purple) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+    }
+
+    @keyframes glitch-text {
+      0%, 90%, 100% { transform: translate(0); }
+      92% { transform: translate(-2px, 1px); }
+      94% { transform: translate(2px, -1px); }
+      96% { transform: translate(-1px, 2px); }
+      98% { transform: translate(1px, -2px); }
+    }
+
+    .hero-subtitle {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.2rem;
+      letter-spacing: 0.5em;
+      color: var(--ash);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      opacity: 0;
+      animation: fade-up 0.8s 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    @keyframes fade-up {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .draw-section {
+      margin-top: 1.5rem;
+      opacity: 0;
+      animation: fade-up 0.8s 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .player-name-container { margin-bottom: 1rem; }
+
+    .player-name-container input {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 1rem;
+      padding: 12px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--obsidian);
+      border-radius: 8px;
+      color: #fff;
+      width: 280px;
+      text-align: center;
+    }
+
+    .player-name-container input::placeholder { color: var(--ash); }
+    .player-name-container input:focus { outline: none; border-color: var(--soul-purple); }
+
+    .hero-hint {
+      color: var(--ash);
+      font-size: 1rem;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+    }
+
+    .room-buttons { display: flex; gap: 15px; justify-content: center; }
+
+    .btn {
+      font-family: 'Rajdhani', sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.9rem 2rem;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--blood-crimson) 0%, #991b1b 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(220, 38, 38, 0.5); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .btn-secondary { background: var(--obsidian); color: var(--mist); border: 1px solid var(--steel); }
+    .btn-secondary:hover { background: var(--steel); }
+    .btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-danger {
+      background: linear-gradient(135deg, #8b2500, #6b1d00);
+      color: white;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+    .btn-danger:hover { background: linear-gradient(135deg, #a33000, #8b2500); }
+
+    .pools-section { padding: 4rem 2rem; max-width: 1400px; margin: 0 auto; }
+    .section-header { text-align: center; margin-bottom: 3rem; }
+
+    .section-title {
+      font-family: 'Orbitron', monospace;
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-subtitle { font-size: 0.9rem; color: var(--ash); letter-spacing: 0.1em; }
+
+    .search-container {
+      position: sticky;
+      top: 70px;
+      z-index: 50;
+      max-width: 400px;
+      margin: 0 auto 2rem;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: 1rem;
+      background: var(--shadow);
+      border: 1px solid var(--obsidian);
+      border-radius: 50px;
+      color: var(--white);
+      outline: none;
+      transition: all 0.3s;
+    }
+
+    .search-input::placeholder { color: var(--ash); }
+    .search-input:focus { border-color: var(--soul-purple); box-shadow: 0 0 20px rgba(139, 92, 246, 0.2); }
+
+    .pools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+
+    .pool-card {
+      background: linear-gradient(145deg, var(--shadow), var(--void-black));
+      border: 1px solid var(--obsidian);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .pool-card:hover { border-color: var(--soul-purple); box-shadow: 0 0 30px rgba(139, 92, 246, 0.2); transform: translateY(-2px); }
+
+    .pool-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--obsidian);
+    }
+
+    .pool-title {
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .pool-title-en { color: var(--white); }
+    .pool-title-zh { color: var(--ash); font-size: 1rem; }
+
+    .pool-count {
+      font-family: 'Orbitron', monospace;
+      font-size: 0.8rem;
+      color: var(--soul-purple);
+      background: rgba(139, 92, 246, 0.1);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+    }
+
+    .pool-list { max-height: 200px; overflow-y: auto; padding-right: 0.5rem; }
+    .pool-list::-webkit-scrollbar { width: 4px; }
+    .pool-list::-webkit-scrollbar-track { background: var(--void-black); border-radius: 2px; }
+    .pool-list::-webkit-scrollbar-thumb { background: var(--obsidian); border-radius: 2px; }
+    .pool-list::-webkit-scrollbar-thumb:hover { background: var(--steel); }
+
+    .pool-item {
+      padding: 0.5rem 0;
+      font-size: 0.85rem;
+      color: var(--smoke);
+      border-bottom: 1px solid rgba(26, 26, 46, 0.5);
+      transition: all 0.2s;
+      cursor: default;
+    }
+
+    .pool-item:hover { color: var(--white); transform: translateX(5px); }
+    .pool-item:last-child { border-bottom: none; }
+    .pool-item.special { color: var(--gold-ember); }
+    .pool-item.special::before { content: '★ '; font-size: 0.7em; }
+
+    .footer { text-align: center; padding: 3rem 2rem; border-top: 1px solid var(--obsidian); margin-top: 4rem; }
+    .footer-text { font-size: 0.8rem; color: var(--ash); letter-spacing: 0.1em; }
+
+    @media (max-width: 768px) {
+      .hero-title { letter-spacing: 0.1em; }
+      .pools-grid { grid-template-columns: 1fr; }
+      .nav-links { gap: 0.25rem; }
+      .nav-link { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
+    }
+
+    /* Overlays */
+    .room-overlay, .join-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 10, 15, 0.98); z-index: 100; padding: 40px; flex-direction: column; align-items: center; overflow-y: auto; }
+    .room-overlay.active, .join-overlay.active { display: flex; }
+
+    .room-header { text-align: center; margin-bottom: 30px; }
+    .room-header h2 { font-family: 'Orbitron', sans-serif; font-size: 2rem; letter-spacing: 4px; margin-bottom: 15px; }
+    .room-code-display { font-family: 'Orbitron', monospace; font-size: 3rem; color: var(--gold-ember); letter-spacing: 8px; display: block; }
+
+    .room-status { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .status-text { color: var(--ash); font-size: 1.2rem; }
+
+    .ws-status {
+      font-family: monospace;
+      font-size: 0.7rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid #22c55e;
+    }
+
+    .room-hands { display: flex; gap: 60px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+    .room-hand { text-align: center; }
+    .room-hand h3 { font-family: 'Orbitron', sans-serif; margin-bottom: 15px; }
+    .room-hand:first-child h3 { color: var(--electric-cyan); }
+    .room-hand:last-child h3 { color: var(--blood-crimson); }
+
+    .hand-display { background: var(--shadow); border: 1px solid var(--obsidian); border-radius: 12px; padding: 20px; min-width: 250px; min-height: 200px; text-align: left; }
+    .hand-card { margin: 8px 0; padding: 8px 12px; background: rgba(0,0,0,0.3); border-radius: 4px; font-family: 'Noto Sans JP', sans-serif; font-size: 0.9rem; border-left: 3px solid; }
+    .hand-card.race { border-color: var(--soul-purple); }
+    .hand-card.weapon { border-color: var(--gold-ember); }
+    .hand-card.ability { border-color: var(--electric-cyan); }
+    .hand-card.entity { border-color: var(--blood-crimson); }
+
+    .vs-divider { font-family: 'Orbitron', sans-serif; font-size: 3rem; color: var(--gold-ember); align-self: center; }
+
+    .battle-actions { display: flex; gap: 15px; justify-content: center; }
+
+    .join-box { background: var(--shadow); border: 2px solid var(--obsidian); border-radius: 12px; padding: 40px; text-align: center; }
+    .join-box h2 { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; letter-spacing: 4px; margin-bottom: 30px; }
+    .code-input { font-family: 'Orbitron', monospace; font-size: 2rem; text-align: center; letter-spacing: 8px; padding: 15px; background: rgba(0,0,0,0.4); border: 2px solid var(--obsidian); border-radius: 8px; color: #fff; width: 250px; text-transform: uppercase; }
+    .join-buttons { display: flex; gap: 15px; justify-content: center; margin-top: 30px; }
+
+    .kicked-notification {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(220, 20, 60, 0.95);
+      color: white;
+      padding: 30px 50px;
+      border-radius: 12px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+      z-index: 200;
+      border: 2px solid var(--gold-ember);
+    }
+
+    .kicked-notification.active { display: block; animation: fade-up 0.5s ease; }
+
+    .room-full-notification {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(220, 20, 60, 0.95);
+      color: white;
+      padding: 30px 50px;
+      border-radius: 12px;
+      font-family: 'Rajdhani', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-align: center;
+      z-index: 200;
+      border: 2px solid var(--gold-ember);
+    }
+
+    .room-full-notification.active { display: block; animation: fade-up 0.5s ease; }
+  </style>
+</head>
+<body>
+  <div class="bg-atmosphere">
+    <div class="bg-gradient"></div>
+    <div class="floating-particles" id="particles"></div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-logo">DARK GAME</div>
+    <div class="nav-links">
+      <a href="rules.html" class="nav-link">RULES</a>
+      <a href="index.html" class="nav-link">POOLS</a>
+      <a href="battle.html" class="nav-link">BATTLE</a>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="en">EN</button>
+      <button class="lang-btn" data-lang="zh">中文</button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1 class="hero-title">
+      <span class="hero-title-draw"><span>DRAW</span></span><br>
+      <span class="hero-title-dark"><span>GAME</span></span>
+    </h1>
+    <p class="hero-subtitle">IMAGINATION IS YOUR WEAPON</p>
+
+    <div class="draw-section">
+      <div class="player-name-container">
+        <input type="text" id="player-name" placeholder="Enter your name" maxlength="20" />
+      </div>
+      <p class="hero-hint">Enter code to join • Create room to start a battle</p>
+      <div class="room-buttons">
+        <button class="btn btn-primary" id="btn-create-room">CREATE ROOM</button>
+        <button class="btn btn-secondary" id="btn-show-join">JOIN ROOM</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="pools-section">
+    <div class="section-header">
+      <h2 class="section-title" id="pools-title">CARD POOLS</h2>
+      <p class="section-subtitle" id="pools-subtitle">Browse all available card pools</p>
+    </div>
+
+    <div class="search-container">
+      <input type="text" class="search-input" id="search-input" placeholder="Search cards..." />
+    </div>
+
+    <div class="pools-grid" id="pools-grid"></div>
+  </section>
+
+  <footer class="footer">
+    <p class="footer-text" id="footer-text">DARK GAME • IMAGINATION IS YOUR WEAPON</p>
+  </footer>
+
+  <div class="room-overlay" id="room-overlay">
+    <div class="room-header">
+      <h2 id="room-title">DARK GAME - ROOM</h2>
+      <span class="room-code-display" id="room-code-display">------</span>
+      <span class="ws-status" id="ws-status">● CONNECTED</span>
+    </div>
+    <div class="room-status">
+      <p class="status-text" id="room-status">Waiting for opponent...</p>
+      <button class="btn btn-secondary" id="btn-copy-code">COPY CODE</button>
+      <button class="btn btn-secondary" id="btn-leave">LEAVE</button>
+    </div>
+    <div class="room-hands">
+      <div class="room-hand">
+        <h3 id="host-name">Player 1</h3>
+        <div class="hand-display" id="host-hand"></div>
+      </div>
+      <div class="vs-divider">VS</div>
+      <div class="room-hand">
+        <h3 id="guest-name" style="color: var(--ash)">Waiting...</h3>
+        <div class="hand-display" id="guest-hand"></div>
+      </div>
+    </div>
+    <div class="battle-actions">
+      <button class="btn btn-primary" id="btn-start-battle" disabled>START BATTLE</button>
+      <button class="btn btn-danger" id="btn-kick-player" style="display:none;">KICK PLAYER</button>
+    </div>
+  </div>
+
+  <div class="join-overlay" id="join-overlay">
+    <div class="join-box">
+      <h2 id="join-title">JOIN ROOM</h2>
+      <input type="text" id="join-code-input" maxlength="6" placeholder="ROOM CODE" class="code-input" />
+      <div class="join-buttons">
+        <button class="btn btn-secondary" id="btn-cancel-join">CANCEL</button>
+        <button class="btn btn-primary" id="btn-join">JOIN</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="kicked-notification" id="kicked-notification"></div>
+  <div class="room-full-notification" id="room-full-notification"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/partysocket@1.0.2/dist/partysocket.min.js"></script>
+  <script>
+    const API_URL = 'http://localhost:3000';
+
+    // PartyKit host — for local dev use localhost:1999, for production use your PartyKit domain
+    const PARTYKT_HOST = window.location.hostname === 'localhost' ? 'localhost:1999' : 'dark-game-battle.[your-username].partykit.dev';
+
+    let pools = {};
+    let currentLang = 'en';
+
+    const i18n = {
+      en: {
+        subtitle: 'IMAGINATION IS YOUR WEAPON',
+        hint: 'Enter code to join • Create room to start a battle',
+        createRoom: 'CREATE ROOM',
+        joinRoom: 'JOIN ROOM',
+        namePlaceholder: 'Enter your name',
+        poolsTitle: 'CARD POOLS',
+        poolsSubtitle: 'Browse all available card pools',
+        searchPlaceholder: 'Search cards...',
+        footer: 'DARK GAME • IMAGINATION IS YOUR WEAPON',
+        roomTitle: 'DARK GAME - ROOM',
+        waitingStatus: 'Waiting for opponent...',
+        player2Joined: 'Player 2 has joined!',
+        copyCode: 'COPY CODE',
+        leave: 'LEAVE',
+        startBattle: 'START BATTLE',
+        joinTitle: 'JOIN ROOM',
+        joinBtn: 'JOIN',
+        cancelBtn: 'CANCEL',
+        copied: 'Copied!',
+        leaveConfirm: 'Leave room?',
+        enterCode: 'Please enter room code!',
+        creating: 'CREATING...',
+        joining: 'JOINING...',
+        kicked: 'You were kicked from the room',
+        roomFull: 'This room is full and no longer joinable.',
+        confirmKick: 'Kick this player?',
+        pools: { abilities: 'Abilities', races: 'Races', weapons: 'Weapons', talents: 'Talents', places: 'Places', events: 'Events', summons: 'Summons' }
+      },
+      zh: {
+        subtitle: '想像力的戰場',
+        hint: '輸入房間碼加入 • 創建房間開始',
+        createRoom: '創建房間',
+        joinRoom: '加入房間',
+        namePlaceholder: '你的名字',
+        poolsTitle: '卡池',
+        poolsSubtitle: '所有卡池列表',
+        searchPlaceholder: '搜尋卡片...',
+        footer: '黑暗遊戲 • 想像力是你的武器',
+        roomTitle: '黑暗遊戲 - 房間',
+        waitingStatus: '等待對手...',
+        player2Joined: '玩家2已加入！',
+        copyCode: '複製房間碼',
+        leave: '離開',
+        startBattle: '開始戰鬥',
+        joinTitle: '加入房間',
+        joinBtn: '加入',
+        cancelBtn: '取消',
+        copied: '已複製!',
+        leaveConfirm: '離開房間?',
+        enterCode: '請輸入房間碼!',
+        creating: '創建中...',
+        joining: '加入中...',
+        kicked: '你被踢出房間了',
+        roomFull: '此房間已滿，無法加入',
+        confirmKick: '踢出此玩家？',
+        pools: { abilities: '能力', races: '種族', weapons: '武器', talents: '天賦', places: '地形', events: '事件', summons: '召喚' }
+      }
+    };
+
+    function updateLanguage(lang) {
+      currentLang = lang;
+      document.documentElement.lang = lang;
+      const t = i18n[lang];
+
+      document.querySelector('.hero-subtitle').textContent = t.subtitle;
+      document.querySelector('.hero-hint').textContent = t.hint;
+      document.getElementById('btn-create-room').textContent = t.createRoom;
+      document.getElementById('btn-show-join').textContent = t.joinRoom;
+      document.getElementById('player-name').placeholder = t.namePlaceholder;
+      document.getElementById('pools-title').textContent = t.poolsTitle;
+      document.getElementById('pools-subtitle').textContent = t.poolsSubtitle;
+      document.getElementById('search-input').placeholder = t.searchPlaceholder;
+      document.getElementById('footer-text').textContent = t.footer;
+      document.getElementById('room-title').textContent = t.roomTitle;
+      document.getElementById('btn-copy-code').textContent = t.copyCode;
+      document.getElementById('btn-leave').textContent = t.leave;
+      document.getElementById('btn-start-battle').textContent = t.startBattle;
+      document.getElementById('join-title').textContent = t.joinTitle;
+      document.getElementById('btn-join').textContent = t.joinBtn;
+      document.getElementById('btn-cancel-join').textContent = t.cancelBtn;
+
+      document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+      });
+
+      loadPools();
+    }
+
+    function createParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+        container.appendChild(particle);
+      }
+    }
+
+    async function loadPools() {
+      try {
+        const res = await fetch(`${API_URL}/api/pools?lang=${currentLang}`);
+        pools = await res.json();
+        renderPools();
+      } catch (err) {
+        console.error('Failed to load pools:', err);
+        document.getElementById('pools-grid').innerHTML = '<p style="color: var(--ash); text-align: center;">Failed to load card pools. Is the server running?</p>';
+      }
+    }
+
+    function renderPools() {
+      const grid = document.getElementById('pools-grid');
+      const t = i18n[currentLang];
+
+      const poolConfig = [
+        { key: 'abilities', icon: '⚡', color: 'var(--blood-crimson)' },
+        { key: 'races', icon: '◆', color: 'var(--electric-cyan)' },
+        { key: 'weapons', icon: '⚔', color: 'var(--gold-ember)' },
+        { key: 'talents', icon: '✦', color: 'var(--void-violet)' },
+        { key: 'places', icon: '◈', color: 'var(--smoke)' },
+        { key: 'events', icon: '◎', color: 'var(--ash)' },
+        { key: 'summons', icon: '★', color: 'var(--soul-purple)' }
+      ];
+
+      grid.innerHTML = poolConfig.map(pool => {
+        const cards = pools[pool.key] || [];
+        return `
+          <div class="pool-card">
+            <div class="pool-header">
+              <div class="pool-title">
+                <span class="pool-title-en" style="color: ${pool.color}">${pool.icon} ${t.pools[pool.key]}</span>
+              </div>
+              <span class="pool-count">${cards.length}</span>
+            </div>
+            <div class="pool-list">
+              ${cards.map(card => {
+                const isSpecial = card.includes('(S)') || card.includes('特殊') || card.includes('★');
+                return `<div class="pool-item ${isSpecial ? 'special' : ''}">${card}</div>`;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    document.getElementById('search-input').addEventListener('input', async (e) => {
+      const keyword = e.target.value.trim();
+      if (!keyword) { renderPools(); return; }
+
+      try {
+        const res = await fetch(`${API_URL}/api/search/${encodeURIComponent(keyword)}`);
+        const results = await res.json();
+        const allMatches = [];
+        for (const [poolName, cards] of Object.entries(results)) {
+          cards.forEach(card => allMatches.push({ pool: poolName, card }));
+        }
+
+        const poolNames = i18n[currentLang].pools;
+        const grid = document.getElementById('pools-grid');
+        grid.innerHTML = `
+          <div class="pool-card" style="grid-column: 1 / -1;">
+            <div class="pool-header">
+              <div class="pool-title"><span class="pool-title-en">SEARCH RESULTS</span></div>
+              <span class="pool-count">${allMatches.length} cards</span>
+            </div>
+            <div class="pool-list" style="max-height: 400px;">
+              ${allMatches.length === 0 ? '<div class="pool-item">No results found</div>' : allMatches.map(m => `
+                <div class="pool-item"><strong style="color: var(--smoke)">[${poolNames[m.pool] || m.pool}]</strong> ${m.card}</div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } catch (err) {
+        console.error('Search failed:', err);
+      }
+    });
+
+    createParticles();
+    updateLanguage('en');
+    loadPools();
+
+    // ─── Multiplayer state ──────────────────────────────────────
+    let currentRoomCode = null;
+    let currentPlayerId = null;
+    let currentHand = null;
+    let lobbySocket = null;
+    let isHost = false;
+
+    function renderHand(hand) {
+      if (!hand) return '';
+      return `
+        <div class="hand-card race">${hand.race}</div>
+        <div class="hand-card weapon">${hand.weapon}</div>
+        <div class="hand-card ability">${hand.abilities[0]}</div>
+        <div class="hand-card ability">${hand.abilities[1]}</div>
+        <div class="hand-card ability">${hand.abilities[2]}</div>
+        <div class="hand-card entity">${hand.entity}</div>
+      `;
+    }
+
+    function connectLobbySocket() {
+      if (lobbySocket) {
+        lobbySocket.close();
+      }
+
+      lobbySocket = new PartySocket({
+        host: PARTYKT_HOST,
+        room: currentRoomCode,
+        query: { playerId: currentPlayerId },
+        reconnect: false,
+      });
+
+      lobbySocket.addEventListener('open', () => {
+        document.getElementById('ws-status').textContent = '● CONNECTED';
+        document.getElementById('ws-status').style.color = '#22c55e';
+        document.getElementById('ws-status').style.borderColor = '#22c55e';
+      });
+
+      lobbySocket.addEventListener('message', (e) => {
+        const msg = JSON.parse(e.data);
+        if (msg.type === 'state') {
+          const s = msg.payload;
+
+          if (s.phase === 'battle') {
+            // Battle has started — redirect both players to battle page
+            window.location.href = `battle.html?room=${currentRoomCode}&player=${currentPlayerId}&lang=${currentLang}&partyHost=${encodeURIComponent(PARTYKT_HOST)}`;
+            return;
+          }
+
+          const player2 = s.players[1];
+          if (player2) {
+            document.getElementById('guest-name').textContent = player2.name;
+            document.getElementById('guest-name').style.color = 'var(--blood-crimson)';
+            document.getElementById('guest-hand').innerHTML = renderHand(player2.hand);
+            document.getElementById('room-status').textContent = i18n[currentLang].player2Joined;
+
+            // Enable Start Battle for host
+            if (isHost) {
+              document.getElementById('btn-start-battle').disabled = false;
+              document.getElementById('btn-kick-player').style.display = 'inline-block';
+            }
+          } else {
+            // Player 2 disconnected — reset UI
+            document.getElementById('guest-name').textContent = 'Waiting...';
+            document.getElementById('guest-name').style.color = 'var(--ash)';
+            document.getElementById('guest-hand').innerHTML = '';
+            document.getElementById('room-status').textContent = i18n[currentLang].waitingStatus;
+            document.getElementById('btn-start-battle').disabled = true;
+            document.getElementById('btn-kick-player').style.display = 'none';
+          }
+        }
+
+        if (msg.type === 'playerKicked') {
+          const notif = document.getElementById('kicked-notification');
+          notif.textContent = i18n[currentLang].kicked;
+          notif.classList.add('active');
+          setTimeout(() => {
+            notif.classList.remove('active');
+            document.getElementById('room-overlay').classList.remove('active');
+            if (lobbySocket) { lobbySocket.close(); lobbySocket = null; }
+          }, 2000);
+        }
+
+        if (msg.type === 'error') {
+          if (msg.code === 'ROOM_FULL') {
+            const notif = document.getElementById('room-full-notification');
+            notif.textContent = i18n[currentLang].roomFull;
+            notif.classList.add('active');
+            setTimeout(() => {
+              notif.classList.remove('active');
+              document.getElementById('join-overlay').classList.remove('active');
+            }, 3000);
+          }
+          console.error('Lobby error:', msg.code, msg.message);
+        }
+      });
+
+      lobbySocket.addEventListener('close', () => {
+        document.getElementById('ws-status').textContent = '○ DISCONNECTED';
+        document.getElementById('ws-status').style.color = '#eab308';
+        document.getElementById('ws-status').style.borderColor = '#eab308';
+      });
+    }
+
+    async function createRoom() {
+      try {
+        const playerName = document.getElementById('player-name').value || 'Player';
+        const btn = document.getElementById('btn-create-room');
+        btn.disabled = true;
+        btn.textContent = i18n[currentLang].creating;
+
+        const res = await fetch(`${API_URL}/api/room/create`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName, lang: currentLang })
+        });
+
+        if (!res.ok) throw new Error('Failed to create room');
+
+        const result = await res.json();
+        if (result.error) throw new Error(result.error);
+
+        currentRoomCode = result.roomCode;
+        currentPlayerId = result.playerId;
+        currentHand = result.hand;
+        isHost = true;
+
+        document.getElementById('room-code-display').textContent = currentRoomCode;
+        document.getElementById('host-name').textContent = playerName;
+        document.getElementById('host-hand').innerHTML = renderHand(currentHand);
+        document.getElementById('room-overlay').classList.add('active');
+        document.getElementById('btn-start-battle').disabled = true;
+
+        connectLobbySocket();
+      } catch (err) {
+        console.error('Create room error:', err);
+        alert('Error: ' + err.message);
+        const btn = document.getElementById('btn-create-room');
+        btn.disabled = false;
+        btn.textContent = i18n[currentLang].createRoom;
+      }
+    }
+
+    async function joinRoom() {
+      try {
+        const code = document.getElementById('join-code-input').value.trim().toUpperCase();
+        const playerName = document.getElementById('player-name').value || 'Player';
+
+        if (!code) {
+          alert(i18n[currentLang].enterCode);
+          return;
+        }
+
+        const btn = document.getElementById('btn-join');
+        btn.disabled = true;
+        btn.textContent = i18n[currentLang].joining;
+
+        const res = await fetch(`${API_URL}/api/room/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ roomCode: code, playerName, lang: currentLang })
+        });
+
+        const result = await res.json();
+
+        if (!res.ok || result.error) {
+          const notif = document.getElementById('room-full-notification');
+          notif.textContent = i18n[currentLang].roomFull;
+          notif.classList.add('active');
+          setTimeout(() => {
+            notif.classList.remove('active');
+            document.getElementById('join-overlay').classList.remove('active');
+          }, 3000);
+          btn.disabled = false;
+          btn.textContent = i18n[currentLang].joinBtn;
+          return;
+        }
+
+        currentRoomCode = result.roomCode;
+        currentPlayerId = result.playerId;
+        currentHand = result.hand;
+        isHost = false;
+
+        document.getElementById('room-code-display').textContent = currentRoomCode;
+        document.getElementById('host-name').textContent = playerName;
+        document.getElementById('host-hand').innerHTML = renderHand(currentHand);
+        document.getElementById('room-overlay').classList.add('active');
+        document.getElementById('join-overlay').classList.remove('active');
+
+        // Guest: no start battle, no kick
+        document.getElementById('btn-start-battle').style.display = 'none';
+        document.getElementById('btn-kick-player').style.display = 'none';
+
+        connectLobbySocket();
+      } catch (err) {
+        console.error('Join room error:', err);
+        alert('Error: ' + err.message);
+        const btn = document.getElementById('btn-join');
+        btn.disabled = false;
+        btn.textContent = i18n[currentLang].joinBtn;
+      }
+    }
+
+    function copyRoomCodeHandler() {
+      navigator.clipboard.writeText(currentRoomCode);
+      alert(i18n[currentLang].copied);
+    }
+
+    function leaveRoomHandler() {
+      if (!confirm(i18n[currentLang].leaveConfirm)) return;
+      if (lobbySocket) { lobbySocket.close(); lobbySocket = null; }
+      document.getElementById('room-overlay').classList.remove('active');
+      currentRoomCode = null;
+      currentPlayerId = null;
+      currentHand = null;
+    }
+
+    function startBattleHandler() {
+      if (!lobbySocket || lobbySocket.readyState !== WebSocket.OPEN) return;
+      lobbySocket.send(JSON.stringify({ type: 'startBattle' }));
+    }
+
+    function kickPlayerHandler() {
+      if (!isHost) return;
+      if (!confirm(i18n[currentLang].confirmKick)) return;
+      if (!lobbySocket || lobbySocket.readyState !== WebSocket.OPEN) return;
+      lobbySocket.send(JSON.stringify({ type: 'kickPlayer' }));
+    }
+
+    // Attach events
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+      btn.addEventListener('click', () => updateLanguage(btn.dataset.lang));
+    });
+
+    document.getElementById('btn-show-join').addEventListener('click', () => {
+      document.getElementById('join-overlay').classList.add('active');
+    });
+
+    document.getElementById('btn-cancel-join').addEventListener('click', () => {
+      document.getElementById('join-overlay').classList.remove('active');
+    });
+
+    document.getElementById('btn-create-room').addEventListener('click', createRoom);
+    document.getElementById('btn-join').addEventListener('click', joinRoom);
+    document.getElementById('btn-copy-code').addEventListener('click', copyRoomCodeHandler);
+    document.getElementById('btn-leave').addEventListener('click', leaveRoomHandler);
+    document.getElementById('btn-start-battle').addEventListener('click', startBattleHandler);
+    document.getElementById('btn-kick-player').addEventListener('click', kickPlayerHandler);
+  </script>
+</body>
+</html>

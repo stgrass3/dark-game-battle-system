@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARK GAME - Battle Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Bebas+Neue&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --void-black: #050508;
+            --deep-void: #0a0a12;
+            --surface: #101020;
+            --blood-crimson: #dc143c;
+            --blood-crimson-glow: #ff1744;
+            --electric-cyan: #00f5ff;
+            --electric-cyan-glow: #80faff;
+            --gold-ember: #ff8c00;
+            --gold-ember-glow: #ffb347;
+            --soul-purple: #9932cc;
+            --soul-purple-glow: #ba68c8;
+            --grey-dim: #2a2a3a;
+            --grey-mid: #4a4a5a;
+            --grey-light: #7a7a8a;
+
+            --card-race: linear-gradient(135deg, #2d1b4e, #4a2c7a);
+            --card-weapon: linear-gradient(135deg, #4a2800, #8b4500);
+            --card-ability: linear-gradient(135deg, #004040, #006666);
+            --card-entity: linear-gradient(135deg, #4a0000, #8b0000);
+        }
+
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background: var(--void-black);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(153, 50, 204, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(220, 20, 60, 0.06) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 245, 255, 0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: linear-gradient(180deg, var(--deep-void) 0%, transparent 100%);
+            border-bottom: 1px solid rgba(153, 50, 204, 0.2);
+        }
+
+        .logo {
+            font-family: 'Cinzel', serif;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 8px;
+            background: linear-gradient(135deg, var(--blood-crimson) 0%, var(--soul-purple) 50%, var(--electric-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(153, 50, 204, 0.5);
+            position: relative;
+        }
+
+        .logo::after {
+            content: 'DARK GAME';
+            position: absolute;
+            left: 0; top: 0;
+            background: linear-gradient(135deg, var(--blood-crimson) 0%, var(--soul-purple) 50%, var(--electric-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            filter: blur(20px);
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 12px; }
+
+        .lang-toggle {
+            display: flex;
+            border: 1px solid var(--grey-dim);
+            border-radius: 6px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .lang-btn {
+            padding: 10px 18px;
+            background: transparent;
+            border: none;
+            color: var(--grey-mid);
+            cursor: pointer;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn.active {
+            background: linear-gradient(135deg, var(--soul-purple), #7b2d9e);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(153, 50, 204, 0.4);
+        }
+
+        .lang-btn:hover:not(.active) {
+            color: #fff;
+            background: rgba(153, 50, 204, 0.2);
+        }
+
+        .ws-status {
+            font-family: monospace;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+
+        .ws-status.connected { color: #22c55e; background: rgba(34,197,94,0.1); border: 1px solid #22c55e; }
+        .ws-status.reconnecting { color: #eab308; background: rgba(234,179,8,0.1); border: 1px solid #eab308; }
+        .ws-status.disconnected { color: #eab308; background: rgba(234,179,8,0.1); border: 1px solid #eab308; }
+        .ws-status.failed { color: #ef4444; background: rgba(239,68,68,0.1); border: 1px solid #ef4444; }
+
+        .arena-wrapper {
+            position: relative;
+            z-index: 5;
+            padding: 30px;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .arena {
+            display: grid;
+            grid-template-columns: 1fr 340px 1fr;
+            gap: 30px;
+            min-height: calc(100vh - 150px);
+        }
+
+        .fighter-panel {
+            background: linear-gradient(180deg, rgba(16, 16, 32, 0.9) 0%, rgba(10, 10, 18, 0.95) 100%);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--grey-dim);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .fighter-panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--grey-dim), transparent);
+            transition: all 0.5s ease;
+        }
+
+        .fighter-panel.player1::before {
+            background: linear-gradient(90deg, transparent, var(--electric-cyan), transparent);
+            box-shadow: 0 0 30px var(--electric-cyan);
+        }
+
+        .fighter-panel.player2::before {
+            background: linear-gradient(90deg, transparent, var(--blood-crimson), transparent);
+            box-shadow: 0 0 30px var(--blood-crimson);
+        }
+
+        .fighter-panel.current-turn {
+            transform: scale(1.01);
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.1);
+            animation: current-turn-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes current-turn-pulse {
+            0%, 100% { box-shadow: 0 0 30px rgba(255, 255, 255, 0.05), 0 0 60px rgba(255, 255, 255, 0.03); }
+            50% { box-shadow: 0 0 40px rgba(255, 255, 255, 0.1), 0 0 80px rgba(255, 255, 255, 0.05); }
+        }
+
+        .player1.current-turn {
+            border-color: var(--electric-cyan);
+            box-shadow: 0 0 60px rgba(0, 245, 255, 0.15);
+        }
+
+        .player2.current-turn {
+            border-color: var(--blood-crimson);
+            box-shadow: 0 0 60px rgba(220, 20, 60, 0.15);
+        }
+
+        .fighter-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            letter-spacing: 3px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .player1 .fighter-name {
+            color: var(--electric-cyan);
+            text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+            border: 1px solid rgba(0, 245, 255, 0.3);
+        }
+
+        .player2 .fighter-name {
+            color: var(--blood-crimson);
+            text-shadow: 0 0 20px rgba(220, 20, 60, 0.5);
+            border: 1px solid rgba(220, 20, 60, 0.3);
+        }
+
+        .cards-stack { display: flex; flex-direction: column; gap: 10px; }
+
+        .card-slot {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 14px 16px;
+            min-height: 56px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+            opacity: 0;
+            transform: translateX(-20px);
+            animation: card-enter 0.6s ease forwards;
+        }
+
+        .card-slot:nth-child(1) { animation-delay: 0.1s; }
+        .card-slot:nth-child(2) { animation-delay: 0.2s; }
+        .card-slot:nth-child(3) { animation-delay: 0.3s; }
+        .card-slot:nth-child(4) { animation-delay: 0.4s; }
+        .card-slot:nth-child(5) { animation-delay: 0.5s; }
+        .card-slot:nth-child(6) { animation-delay: 0.6s; }
+
+        @keyframes card-enter {
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .card-slot::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .card-slot.race::before { background: var(--card-race); box-shadow: 0 0 15px rgba(153, 50, 204, 0.5); }
+        .card-slot.weapon::before { background: var(--card-weapon); box-shadow: 0 0 15px rgba(255, 140, 0, 0.5); }
+        .card-slot.ability::before { background: var(--card-ability); box-shadow: 0 0 15px rgba(0, 245, 255, 0.5); }
+        .card-slot.entity::before { background: var(--card-entity); box-shadow: 0 0 15px rgba(220, 20, 60, 0.5); }
+
+        .card-slot:hover {
+            transform: translateX(5px);
+            background: rgba(0, 0, 0, 0.6);
+        }
+
+        .card-slot.race:hover { box-shadow: inset 0 0 30px rgba(153, 50, 204, 0.2); }
+        .card-slot.weapon:hover { box-shadow: inset 0 0 30px rgba(255, 140, 0, 0.2); }
+        .card-slot.ability:hover { box-shadow: inset 0 0 30px rgba(0, 245, 255, 0.2); }
+        .card-slot.entity:hover { box-shadow: inset 0 0 30px rgba(220, 20, 60, 0.2); }
+
+        .card-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--grey-mid);
+            margin-bottom: 6px;
+        }
+
+        .card-content {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 0.95rem;
+            line-height: 1.3;
+        }
+
+        .passive-keyword {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(153, 50, 204, 0.3);
+            color: var(--soul-purple-glow);
+            border-radius: 4px;
+            font-weight: 700;
+            text-shadow: 0 0 10px var(--soul-purple);
+            animation: passive-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes passive-glow {
+            0%, 100% { text-shadow: 0 0 10px var(--soul-purple); }
+            50% { text-shadow: 0 0 20px var(--soul-purple), 0 0 30px var(--soul-purple-glow); }
+        }
+
+        .passives-section {
+            display: none;
+            background: linear-gradient(135deg, rgba(153, 50, 204, 0.15) 0%, rgba(153, 50, 204, 0.05) 100%);
+            border: 1px dashed var(--soul-purple);
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 10px;
+        }
+
+        .passives-section.active { display: block; animation: section-enter 0.5s ease; }
+
+        @keyframes section-enter {
+            from { opacity: 0; transform: scaleY(0.8); }
+            to { opacity: 1; transform: scaleY(1); }
+        }
+
+        .passive-alert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--soul-purple-glow);
+            font-size: 0.85rem;
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        .passive-alert::before { content: '◆'; animation: passive-pulse 1.5s ease-in-out infinite; }
+
+        @keyframes passive-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .narrative-center { display: flex; flex-direction: column; gap: 20px; }
+
+        .turn-indicator {
+            background: linear-gradient(180deg, rgba(16, 16, 32, 0.95) 0%, rgba(10, 10, 18, 0.98) 100%);
+            border: 2px solid var(--gold-ember);
+            border-radius: 16px;
+            padding: 28px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .turn-indicator::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(255, 140, 0, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .turn-indicator .turn-num {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 4rem;
+            color: var(--gold-ember);
+            letter-spacing: 6px;
+            line-height: 1;
+            text-shadow: 0 0 40px rgba(255, 140, 0, 0.5);
+        }
+
+        .turn-indicator .turn-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.7rem;
+            color: var(--grey-mid);
+            letter-spacing: 4px;
+            margin-bottom: 4px;
+        }
+
+        .turn-indicator .current-player {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #fff;
+            margin-top: 10px;
+            padding: 8px 20px;
+            background: rgba(255, 140, 0, 0.1);
+            border-radius: 20px;
+            display: inline-block;
+            border: 1px solid rgba(255, 140, 0, 0.3);
+        }
+
+        .turn-indicator .current-player.is-me {
+            background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(0, 245, 255, 0.1));
+            border-color: var(--electric-cyan);
+            color: var(--electric-cyan);
+            animation: your-turn-glow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes your-turn-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 245, 255, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(0, 245, 255, 0.5); }
+        }
+
+        .environment-card {
+            background: linear-gradient(135deg, rgba(20, 20, 35, 0.9), rgba(15, 15, 25, 0.95));
+            border: 1px solid var(--grey-dim);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .environment-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(135deg, transparent, rgba(153, 50, 204, 0.3), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+
+        .environment-card .label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.65rem;
+            color: var(--grey-mid);
+            letter-spacing: 3px;
+            margin-bottom: 8px;
+        }
+
+        .environment-card .place-name {
+            font-family: 'Noto Sans JP', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--soul-purple-glow);
+            text-shadow: 0 0 20px rgba(153, 50, 204, 0.5);
+        }
+
+        .narrative-input-section {
+            background: linear-gradient(180deg, rgba(16, 16, 32, 0.95) 0%, rgba(10, 10, 18, 0.98) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--grey-dim);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .narrative-input {
+            width: 100%;
+            min-height: 100px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--grey-dim);
+            border-radius: 10px;
+            padding: 16px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.1rem;
+            resize: vertical;
+            transition: all 0.3s ease;
+        }
+
+        .narrative-input:focus {
+            outline: none;
+            border-color: var(--electric-cyan);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.2);
+        }
+
+        .narrative-input::placeholder { color: var(--grey-mid); }
+
+        .action-buttons { display: flex; flex-direction: column; gap: 10px; }
+
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before { left: 100%; }
+
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--electric-cyan), #0088aa);
+            color: #000;
+            box-shadow: 0 4px 20px rgba(0, 245, 255, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 245, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--grey-dim), #3a3a4a);
+            color: #fff;
+            border: 1px solid var(--grey-mid);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            background: linear-gradient(135deg, #3a3a4a, #4a4a5a);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--blood-crimson), #aa0022);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(220, 20, 60, 0.3);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(220, 20, 60, 0.5);
+        }
+
+        .combat-log {
+            background: linear-gradient(180deg, rgba(16, 16, 32, 0.95) 0%, rgba(10, 10, 18, 0.98) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid var(--grey-dim);
+            max-height: 280px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .combat-log h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            color: var(--grey-mid);
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--grey-dim);
+        }
+
+        .log-entries { flex: 1; overflow-y: auto; padding-right: 10px; }
+        .log-entries::-webkit-scrollbar { width: 4px; }
+        .log-entries::-webkit-scrollbar-track { background: var(--grey-dim); border-radius: 2px; }
+        .log-entries::-webkit-scrollbar-thumb { background: var(--soul-purple); border-radius: 2px; }
+
+        .log-entry {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(64, 64, 80, 0.5);
+            font-size: 0.95rem;
+            animation: log-enter 0.4s ease;
+        }
+
+        @keyframes log-enter {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .log-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+
+        .log-player { font-family: 'Cinzel', serif; font-weight: 700; font-size: 0.85rem; }
+        .log-player.p1 { color: var(--electric-cyan); }
+        .log-player.p2 { color: var(--blood-crimson); }
+
+        .log-turn {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.6rem;
+            color: var(--grey-mid);
+            padding: 2px 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .log-text { color: #fff; line-height: 1.5; padding-left: 10px; border-left: 2px solid var(--grey-dim); }
+
+        .victory-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            gap: 40px;
+        }
+
+        .victory-overlay.active { display: flex; animation: overlay-enter 0.5s ease; }
+
+        @keyframes overlay-enter {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .victory-text {
+            font-family: 'Cinzel', serif;
+            font-size: 4rem;
+            text-align: center;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--gold-ember) 0%, #ffd700 50%, var(--gold-ember) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 60px rgba(255, 140, 0, 0.5);
+            animation: victory-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes victory-glow {
+            0%, 100% { filter: drop-shadow(0 0 30px rgba(255, 140, 0, 0.5)); }
+            50% { filter: drop-shadow(0 0 60px rgba(255, 140, 0, 0.8)); }
+        }
+
+        .debate-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.97);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .debate-overlay.active { display: flex; animation: overlay-enter 0.3s ease; }
+
+        .debate-panel {
+            background: linear-gradient(180deg, rgba(20, 20, 35, 0.98) 0%, rgba(10, 10, 18, 1) 100%);
+            border: 2px solid var(--gold-ember);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 900px;
+            width: 90%;
+            position: relative;
+        }
+
+        .debate-panel::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--electric-cyan), var(--gold-ember), var(--blood-crimson));
+            z-index: -1;
+            animation: border-rotate 3s linear infinite;
+        }
+
+        @keyframes border-rotate {
+            0% { filter: hue-rotate(0deg); }
+            100% { filter: hue-rotate(360deg); }
+        }
+
+        .debate-header {
+            font-family: 'Cinzel', serif;
+            text-align: center;
+            color: var(--gold-ember);
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            margin-bottom: 30px;
+            text-shadow: 0 0 30px rgba(255, 140, 0, 0.5);
+        }
+
+        .debate-sides {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .debate-side {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 120px;
+        }
+
+        .debate-side .card-label { font-size: 0.65rem; margin-bottom: 12px; }
+        .debate-side.attack { border-left: 4px solid var(--electric-cyan); box-shadow: inset 0 0 30px rgba(0, 245, 255, 0.1); }
+        .debate-side.defend { border-left: 4px solid var(--blood-crimson); box-shadow: inset 0 0 30px rgba(220, 20, 60, 0.1); }
+
+        .debate-chat {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 12px;
+            padding: 16px;
+            height: 160px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            border: 1px solid var(--grey-dim);
+        }
+
+        .debate-message {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .debate-input-row { display: flex; gap: 12px; margin-bottom: 20px; }
+
+        .debate-input-row input {
+            flex: 1;
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--grey-dim);
+            border-radius: 10px;
+            color: #fff;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .debate-input-row input:focus {
+            outline: none;
+            border-color: var(--gold-ember);
+            box-shadow: 0 0 15px rgba(255, 140, 0, 0.2);
+        }
+
+        .resolution-buttons { display: flex; gap: 20px; justify-content: center; }
+
+        .btn-counts {
+            background: linear-gradient(135deg, #228b22, #1a6b1a);
+            padding: 14px 40px;
+            box-shadow: 0 4px 20px rgba(34, 139, 34, 0.3);
+        }
+
+        .btn-counts:hover { box-shadow: 0 6px 30px rgba(34, 139, 34, 0.5); }
+
+        .btn-void {
+            background: linear-gradient(135deg, #8b0000, #660000);
+            padding: 14px 40px;
+            box-shadow: 0 4px 20px rgba(139, 0, 0, 0.3);
+        }
+
+        .btn-void:hover { box-shadow: 0 6px 30px rgba(139, 0, 0, 0.5); }
+
+        .room-full-banner {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(220, 20, 60, 0.95);
+            color: white;
+            padding: 40px 60px;
+            border-radius: 12px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-align: center;
+            z-index: 200;
+            border: 2px solid var(--blood-crimson);
+        }
+
+        .room-full-banner.active { display: block; }
+
+        .rules-link {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            color: var(--grey-mid);
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid var(--grey-dim);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .rules-link:hover {
+            color: var(--gold-ember);
+            border-color: var(--gold-ember);
+            box-shadow: 0 0 20px rgba(255, 140, 0, 0.2);
+        }
+
+        @media (max-width: 1200px) {
+            .arena { grid-template-columns: 1fr 280px 1fr; gap: 20px; }
+        }
+
+        @media (max-width: 900px) {
+            .arena { grid-template-columns: 1fr; gap: 20px; }
+            .fighter-panel.player1 { order: 1; }
+            .narrative-center { order: 2; }
+            .fighter-panel.player2 { order: 3; }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">DARK GAME</div>
+        <div class="header-right">
+            <span class="ws-status disconnected" id="ws-status">○ OFFLINE</span>
+            <div class="lang-toggle">
+                <button class="lang-btn active" data-lang="zh">中文</button>
+                <button class="lang-btn" data-lang="en">EN</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="arena-wrapper">
+        <div class="arena">
+            <div class="fighter-panel player1" id="p1-panel">
+                <div class="fighter-name" id="p1-name">Player 1</div>
+                <div class="cards-stack">
+                    <div class="card-slot race">
+                        <div class="card-label" data-i18n="race">種族</div>
+                        <div class="card-content" id="p1-race">-</div>
+                    </div>
+                    <div class="card-slot weapon">
+                        <div class="card-label" data-i18n="weapon">武器</div>
+                        <div class="card-content" id="p1-weapon">-</div>
+                    </div>
+                    <div class="card-slot ability">
+                        <div class="card-label" data-i18n="ability1">能力 1</div>
+                        <div class="card-content" id="p1-ability-1">-</div>
+                    </div>
+                    <div class="card-slot ability">
+                        <div class="card-label" data-i18n="ability2">能力 2</div>
+                        <div class="card-content" id="p1-ability-2">-</div>
+                    </div>
+                    <div class="card-slot ability">
+                        <div class="card-label" data-i18n="ability3">能力 3</div>
+                        <div class="card-content" id="p1-ability-3">-</div>
+                    </div>
+                    <div class="card-slot entity">
+                        <div class="card-label" data-i18n="entity">召喚物</div>
+                        <div class="card-content" id="p1-entity">-</div>
+                    </div>
+                </div>
+                <div class="passives-section" id="p1-passives">
+                    <div class="passive-alert" data-i18n="passive-hint">被動觸發提示</div>
+                </div>
+            </div>
+
+            <div class="narrative-center">
+                <div class="turn-indicator">
+                    <div class="turn-label">ROUND</div>
+                    <div class="turn-num"><span id="turn-number">1</span></div>
+                    <div class="current-player" id="current-player-text">等待中...</div>
+                </div>
+
+                <div class="environment-card">
+                    <div class="label" data-i18n="environment">環境</div>
+                    <div class="place-name" id="environment-place">-</div>
+                </div>
+
+                <div class="narrative-input-section">
+                    <textarea class="narrative-input" id="narrative-input" placeholder="描述你的攻擊... / Describe your attack..."></textarea>
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="btn-submit" data-i18n="submit">送出</button>
+                        <button class="btn btn-secondary" id="btn-endturn" data-i18n="end-turn">結束回合</button>
+                        <button class="btn btn-secondary" id="btn-debate" data-i18n="debate">辯論</button>
+                        <button class="btn btn-danger" id="btn-surrender" data-i18n="surrender">投降</button>
+                        <button class="btn btn-danger" id="btn-death" data-i18n="death">宣布死亡</button>
+                    </div>
+                </div>
+
+                <div class="combat-log">
+                    <h3 data-i18n="combat-log">戰鬥記錄</h3>
+                    <div class="log-entries" id="combat-log-content"></div>
+                </div>
+            </div>
+
+            <div class="fighter-panel player2" id="p2-panel">
+                <div class="fighter-name" id="p2-name">Player 2</div>
+                <div class="cards-stack">
+                    <div class="card-slot race">
+                        <div class="card-label" data-i18n="race">種族</div>
+                        <div class="card-content" id="p2-race">-</div>
+                    </div>
+                    <div class="card-slot weapon">
+                        <div class="card-label" data-i18n="weapon">武器</div>
+                        <div class="card-content" id="p2-weapon">-</div>
+                    </div>
+                    <div class="card-slot ability">
+                        <div class="card-label" data-i18n="ability1">能力 1</div>
+                        <div class="card-content" id="p2-ability-1">-</div>
+                    </div>
+                    <div class="card-slot ability">
+                        <div class="card-label" data-i18n="ability2">能力 2</div>
+                        <div class="card-content" id="p2-ability-2">-</div>
+                    </div>
+                    <div class="card-slot ability">
+                        <div class="card-label" data-i18n="ability3">能力 3</div>
+                        <div class="card-content" id="p2-ability-3">-</div>
+                    </div>
+                    <div class="card-slot entity">
+                        <div class="card-label" data-i18n="entity">召喚物</div>
+                        <div class="card-content" id="p2-entity">-</div>
+                    </div>
+                </div>
+                <div class="passives-section" id="p2-passives">
+                    <div class="passive-alert" data-i18n="passive-hint">被動觸發提示</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="victory-overlay" id="victory-overlay">
+        <div class="victory-text" id="victory-text">勝利!</div>
+        <button class="btn btn-primary" onclick="location.href='index.html'" data-i18n="return-lobby">返回大廳</button>
+    </div>
+
+    <div class="debate-overlay" id="debate-overlay">
+        <div class="debate-panel">
+            <h2 class="debate-header" data-i18n="debate-title">辯論模式</h2>
+            <div class="debate-sides">
+                <div class="debate-side attack">
+                    <div class="card-label" data-i18n="attacker">攻擊方</div>
+                    <div id="debate-attack-text"></div>
+                </div>
+                <div class="debate-side defend">
+                    <div class="card-label" data-i18n="defender">防守方</div>
+                    <div id="debate-defend-text"></div>
+                </div>
+            </div>
+            <div class="debate-chat" id="debate-chat"></div>
+            <div class="debate-input-row">
+                <input type="text" id="debate-input" placeholder="輸入論點...">
+                <button class="btn btn-secondary" id="btn-debate-send" data-i18n="send">送出</button>
+            </div>
+            <div class="resolution-buttons">
+                <button class="btn btn-counts" id="btn-counts" data-i18n="counts">算我贏</button>
+                <button class="btn btn-void" id="btn-void" data-i18n="void">不算</button>
+                <button class="btn btn-secondary" id="btn-debate-close" data-i18n="cancel">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="room-full-banner" id="room-full-banner">
+        <span id="room-full-text">THIS ROOM IS FULL</span>
+    </div>
+
+    <a href="rules.html" class="rules-link" data-i18n="rules">規則 / RULES</a>
+
+    <script src="https://cdn.jsdelivr.net/npm/partysocket@1.0.2/dist/partysocket.min.js"></script>
+    <script>
+        const API_URL = 'http://localhost:3000';
+
+        // PartyKit host — set from query param or default to localhost
+        const params = new URLSearchParams(window.location.search);
+        const PARTYKT_HOST = params.get('partyHost') || 'localhost:1999';
+
+        const i18n = {
+            zh: {
+                race: '種族', weapon: '武器', ability1: '能力 1', ability2: '能力 2', ability3: '能力 3',
+                entity: '召喚物', submit: '送出', 'end-turn': '結束回合', debate: '辯論', surrender: '投降',
+                death: '宣布死亡', 'combat-log': '戰鬥記錄', 'victory-title': '勝利!', 'return-lobby': '返回大廳',
+                'debate-title': '辯論模式', attacker: '攻擊方', defender: '防守方', send: '送出',
+                counts: '算我贏', void: '不算', cancel: '取消', rules: '規則', 'passive-hint': '被動觸發提示',
+                'your-turn': '你的回合', waiting: '等待中...', environment: '環境',
+                'room-full': '此房間已滿，無法加入', 'not-connected': '未連接',
+                'battle-starting': '戰鬥開始！'
+            },
+            en: {
+                race: 'RACE', weapon: 'WEAPON', ability1: 'ABILITY 1', ability2: 'ABILITY 2', ability3: 'ABILITY 3',
+                entity: 'ENTITY', submit: 'SUBMIT', 'end-turn': 'END TURN', debate: 'DEBATE', surrender: 'SURRENDER',
+                death: 'DECLARE DEATH', 'combat-log': 'COMBAT LOG', 'victory-title': 'VICTORY!', 'return-lobby': 'RETURN TO LOBBY',
+                'debate-title': 'DEBATE MODE', attacker: 'ATTACKER', defender: 'DEFENDER', send: 'SEND',
+                counts: 'COUNTS', void: 'VOID', cancel: 'CANCEL', rules: 'RULES', 'passive-hint': 'PASSIVE ACTIVE',
+                'your-turn': 'YOUR TURN', waiting: 'WAITING...', environment: 'ENVIRONMENT',
+                'room-full': 'THIS ROOM IS FULL AND NO LONGER JOINABLE',
+                'not-connected': 'NOT CONNECTED',
+                'battle-starting': 'BATTLE STARTING!'
+            }
+        };
+
+        let currentLang = 'en';
+        let playerId = null;
+        let roomCode = null;
+        let socket = null;
+        let state = null;
+        let reconnectAttempts = 0;
+        const MAX_RECONNECT = 5;
+
+        const passivePatterns = ['舔血', '吸收', '再生', '反彈', '閃避', '盾', '護體', '不死'];
+
+        function highlightPassives(text) {
+            let result = text || '';
+            passivePatterns.forEach(p => {
+                if (result.includes(p)) {
+                    const regex = new RegExp(`(${p})`, 'g');
+                    result = result.replace(regex, '<span class="passive-keyword">$1</span>');
+                }
+            });
+            return result;
+        }
+
+        function detectPassive(cardText) {
+            return passivePatterns.find(p => cardText && cardText.includes(p));
+        }
+
+        function updateLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18n[lang][key]) el.textContent = i18n[lang][key];
+            });
+            document.querySelectorAll('.lang-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.lang === lang));
+            updateTurnIndicator();
+        }
+
+        function updateTurnIndicator() {
+            document.getElementById('turn-number').textContent = state?.turnNumber || 1;
+            const playerText = document.getElementById('current-player-text');
+            if (isMyTurn()) {
+                playerText.textContent = i18n[currentLang]['your-turn'];
+                playerText.classList.add('is-me');
+            } else {
+                playerText.textContent = i18n[currentLang]['waiting'];
+                playerText.classList.remove('is-me');
+            }
+        }
+
+        function isMyTurn() {
+            return state && playerId && state.currentPlayerId === playerId;
+        }
+
+        function renderLog(log) {
+            const content = document.getElementById('combat-log-content');
+            content.innerHTML = (log || []).map(e => {
+                const playerClass = e.playerId === playerId ? 'p1' : 'p2';
+                return `
+                    <div class="log-entry">
+                        <div class="log-header">
+                            <span class="log-player ${playerClass}">${e.playerName}:</span>
+                            <span class="log-turn">T${e.turn}</span>
+                        </div>
+                        <div class="log-text">${highlightPassives(e.text)}</div>
+                    </div>
+                `;
+            }).join('');
+            content.scrollTop = content.scrollHeight;
+        }
+
+        function renderPlayerCards(containerId, hand, currentPlayerId) {
+            if (!hand) return;
+            document.getElementById(containerId + '-race').innerHTML = highlightPassives(hand.race);
+            document.getElementById(containerId + '-weapon').innerHTML = highlightPassives(hand.weapon);
+            document.getElementById(containerId + '-ability-1').innerHTML = highlightPassives(hand.abilities[0]);
+            document.getElementById(containerId + '-ability-2').innerHTML = highlightPassives(hand.abilities[1]);
+            document.getElementById(containerId + '-ability-3').innerHTML = highlightPassives(hand.abilities[2]);
+            document.getElementById(containerId + '-entity').innerHTML = highlightPassives(hand.entity);
+
+            const hasPassive = [hand.race, hand.weapon, ...hand.abilities, hand.entity].some(c => detectPassive(c));
+            document.getElementById(containerId + '-passives').classList.toggle('active', hasPassive);
+        }
+
+        function renderState(newState) {
+            state = newState;
+
+            const p1 = state.players[0];
+            const p2 = state.players[1];
+
+            document.getElementById('p1-name').textContent = p1?.name || 'Player 1';
+            document.getElementById('p1-panel').classList.toggle('current-turn', state.currentPlayerId === p1?.id);
+
+            document.getElementById('p2-name').textContent = p2?.name || 'Player 2';
+            document.getElementById('p2-panel').classList.toggle('current-turn', state.currentPlayerId === p2?.id);
+
+            if (p1) renderPlayerCards('p1', p1.hand);
+            if (p2) renderPlayerCards('p2', p2.hand);
+
+            renderLog(state.narrativeLog);
+            updateTurnIndicator();
+
+            // Button state
+            const myTurn = isMyTurn();
+            const inBattle = state.phase === 'battle' || state.phase === 'debate';
+            const debateOn = state.debateActive;
+
+            document.getElementById('btn-submit').disabled = !myTurn || debateOn || !inBattle;
+            document.getElementById('btn-endturn').disabled = !myTurn || debateOn || !inBattle;
+            document.getElementById('btn-debate').disabled = !myTurn || debateOn || state.narrativeLog.length === 0 || !inBattle;
+
+            // Debate overlay
+            const debateOverlay = document.getElementById('debate-overlay');
+            if (state.debateActive) {
+                debateOverlay.classList.add('active');
+                document.getElementById('debate-attack-text').textContent = state.attackNarration || '';
+                const chat = document.getElementById('debate-chat');
+                chat.innerHTML = (state.debateEntries || []).map(e =>
+                    `<div class="debate-message">${e.playerName}: ${e.text}</div>`
+                ).join('');
+                chat.scrollTop = chat.scrollHeight;
+            } else {
+                debateOverlay.classList.remove('active');
+            }
+
+            // Victory overlay
+            if (state.phase === 'ended' && state.winner) {
+                document.getElementById('victory-text').textContent = `${state.winner} ${i18n[currentLang]['victory-title']}`;
+                document.getElementById('victory-overlay').classList.add('active');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const colors = { info: '#00f5ff', error: '#dc143c', success: '#22c55e' };
+            const toast = document.createElement('div');
+            toast.style.cssText = `position:fixed;top:80px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.9);color:${colors[type] || colors.info};padding:10px 20px;border:1px solid ${colors[type] || colors.info};border-radius:8px;z-index:999;font-family:monospace;font-size:0.9rem;animation:fade-in 0.3s ease;`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        function updateWsStatus(status) {
+            const el = document.getElementById('ws-status');
+            const labels = {
+                connected: '● LIVE',
+                reconnecting: '◌ RECONNECTING',
+                disconnected: '○ OFFLINE',
+                failed: '✕ DISCONNECTED',
+            };
+            el.className = 'ws-status ' + status;
+            el.textContent = labels[status] || status;
+        }
+
+        function send(msg) {
+            if (!socket || socket.readyState !== WebSocket.OPEN) {
+                showToast(i18n[currentLang]['not-connected'], 'error');
+                return;
+            }
+            socket.send(JSON.stringify(msg));
+        }
+
+        function handleMessage(msg) {
+            switch (msg.type) {
+                case 'state':
+                    renderState(msg.payload);
+                    break;
+
+                case 'battleStart':
+                    showToast(i18n[currentLang]['battle-starting'], 'info');
+                    break;
+
+                case 'victory':
+                    document.getElementById('victory-text').textContent = `${msg.winner} ${i18n[currentLang]['victory-title']}`;
+                    document.getElementById('victory-overlay').classList.add('active');
+                    break;
+
+                case 'playerKicked':
+                    alert(currentLang === 'zh' ? '你被踢出房間了' : 'You were kicked from the room');
+                    window.location.href = 'index.html';
+                    break;
+
+                case 'opponentDisconnected':
+                    showToast(currentLang === 'zh' ? `對手斷線，等待中（${msg.timeout}秒）...` : `Opponent disconnected — waiting (${msg.timeout}s)...`, 'error');
+                    break;
+
+                case 'opponentReconnected':
+                    showToast(currentLang === 'zh' ? '對手重新連接！' : 'Opponent reconnected!', 'success');
+                    break;
+
+                case 'pong':
+                    break;
+
+                case 'error':
+                    console.error('Server error:', msg.code, msg.message);
+                    showToast(`Error: ${msg.message}`, 'error');
+                    break;
+            }
+        }
+
+        function connect() {
+            const isLocal = PARTYKT_HOST.includes('localhost') || PARTYKT_HOST.includes('127.0.0.1');
+            const host = isLocal ? 'localhost:1999' : PARTYKT_HOST;
+
+            socket = new PartySocket({ host, room: roomCode, query: { playerId }, reconnect: false });
+
+            socket.addEventListener('open', () => {
+                console.log('PartyKit connected');
+                reconnectAttempts = 0;
+                updateWsStatus('connected');
+            });
+
+            socket.addEventListener('close', () => {
+                handleDisconnect();
+            });
+
+            socket.addEventListener('error', (e) => {
+                console.error('PartyKit error:', e);
+            });
+
+            socket.addEventListener('message', (e) => {
+                handleMessage(JSON.parse(e.data));
+            });
+        }
+
+        function handleDisconnect() {
+            updateWsStatus('disconnected');
+            if (reconnectAttempts < MAX_RECONNECT) {
+                reconnectAttempts++;
+                updateWsStatus('reconnecting');
+                const delay = Math.pow(2, reconnectAttempts - 1) * 1000;
+                setTimeout(connect, delay);
+            } else {
+                updateWsStatus('failed');
+            }
+        }
+
+        // Action handlers
+        function submitNarrative() {
+            if (!isMyTurn()) return;
+            const text = document.getElementById('narrative-input').value.trim();
+            if (!text) return;
+            send({ type: 'narrate', text });
+            document.getElementById('narrative-input').value = '';
+        }
+
+        function endTurn() {
+            if (!isMyTurn()) return;
+            send({ type: 'endTurn' });
+        }
+
+        function openDebate() {
+            if (!state || state.phase !== 'battle') return;
+            const lastEntry = state.narrativeLog[state.narrativeLog.length - 1];
+            if (!lastEntry || lastEntry.playerId === playerId) return;
+            document.getElementById('debate-attack-text').textContent = lastEntry.text;
+            send({ type: 'openDebate' });
+        }
+
+        function declareVictory(type) {
+            const msg = type === 'surrender'
+                ? (currentLang === 'zh' ? '確認投降？' : 'Confirm surrender?')
+                : (currentLang === 'zh' ? '確認死亡？' : 'Confirm death?');
+            if (!confirm(msg)) return;
+            send({ type: 'declareVictory', method: type });
+        }
+
+        // Event listeners
+        document.querySelectorAll('.lang-btn').forEach(btn =>
+            btn.addEventListener('click', () => updateLanguage(btn.dataset.lang))
+        );
+
+        document.getElementById('btn-submit').addEventListener('click', submitNarrative);
+        document.getElementById('btn-endturn').addEventListener('click', endTurn);
+        document.getElementById('btn-debate').addEventListener('click', openDebate);
+        document.getElementById('btn-surrender').addEventListener('click', () => declareVictory('surrender'));
+        document.getElementById('btn-death').addEventListener('click', () => declareVictory('death'));
+
+        document.getElementById('btn-debate-close').addEventListener('click', () =>
+            document.getElementById('debate-overlay').classList.remove('active')
+        );
+
+        document.getElementById('btn-counts').addEventListener('click', () =>
+            send({ type: 'resolveDebate', verdict: 'counts' })
+        );
+
+        document.getElementById('btn-void').addEventListener('click', () =>
+            send({ type: 'resolveDebate', verdict: 'void' })
+        );
+
+        document.getElementById('btn-debate-send').addEventListener('click', () => {
+            const input = document.getElementById('debate-input');
+            const text = input.value.trim();
+            if (!text) return;
+            send({ type: 'debateMessage', text });
+            input.value = '';
+        });
+
+        // Enter key for narrative
+        document.getElementById('narrative-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.ctrlKey && isMyTurn()) {
+                e.preventDefault();
+                submitNarrative();
+            }
+        });
+
+        // Toast animation style
+        if (!document.getElementById('toast-style')) {
+            const style = document.createElement('style');
+            style.id = 'toast-style';
+            style.textContent = `@keyframes fade-in { from { opacity:0; transform: translateX(-50%) translateY(-10px); } to { opacity:1; transform: translateX(-50%) translateY(0); } }`;
+            document.head.appendChild(style);
+        }
+
+        function init() {
+            const params = new URLSearchParams(window.location.search);
+            roomCode = params.get('room');
+            playerId = params.get('player');
+
+            // Optional: load hand from REST API if not embedded in URL
+            // For now, PartyKit state will contain hand data from Vercel API
+            currentLang = params.get('lang') || 'en';
+
+            if (!roomCode || !playerId) {
+                alert(currentLang === 'zh' ? '房間無效' : 'Invalid room');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            updateLanguage(currentLang);
+            connect();
+        }
+
+        init();
+    </script>
+</body>
+</html>

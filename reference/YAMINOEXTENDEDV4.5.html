@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <title>YaMiNo Gamoe! 抽卡漸慢動畫</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; background: #111; color: #fff; text-align: center; padding: 50px; }
+    h1 { font-size: 36px; margin-bottom: 40px; }
+    .card-section { display: inline-block; vertical-align: top; background-color: #222; padding: 30px; margin: 20px; border-radius: 20px; width: 300px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+    .card-section h2 { margin-bottom: 20px; font-size: 24px; }
+    .drawBtn { padding: 15px 30px; font-size: 20px; background-color: #28a745; color: white; border: none; border-radius: 10px; cursor: pointer; transition: transform 0.2s ease, background-color 0.3s ease; }
+    .drawBtn:hover { background-color: #218838; transform: scale(1.05); }
+    .drawBtn:active { transform: scale(0.95); }
+    .result { margin-top: 20px; font-size: 20px; color: #00ffc8; min-height: 80px; white-space: pre-wrap; overflow: hidden; text-overflow: ellipsis; position: relative; left: 0; }
+    #searchContainer { position: fixed; top: 20px; right: 30px; text-align: left; z-index: 999; }
+    #searchInput { padding: 10px; font-size: 16px; border-radius: 8px; border: none; width: 200px; }
+    #searchResults { background-color: #222; color: #0ff; margin-top: 5px; border-radius: 8px; max-height: 300px; overflow-y: auto; font-size: 14px; display: none; padding: 10px; width: 200px; }
+    .management-section { width: 350px; }
+    .management-section input, .management-section select { width: 95%; padding: 12px; font-size: 16px; border-radius: 8px; border: 1px solid #555; background-color: #333; color: #fff; margin-bottom: 15px; }
+    .management-section select { cursor: pointer; }
+    .management-section h3 { margin-top: 20px; margin-bottom: 15px; color: #00ffc8; font-size: 20px; border-bottom: 1px solid #444; padding-bottom: 10px; }
+    .management-section .message { min-height: 24px; margin-top: 15px; font-size: 16px; font-weight: bold; transition: opacity 0.5s; }
+    .control-disabled { cursor: not-allowed; background-color: #555 !important; opacity: 0.6; }
+    .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); }
+    .modal-content { background-color: #2a2a2a; margin: 10% auto; padding: 25px; border: 1px solid #888; border-radius: 15px; width: 80%; max-width: 700px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+    .close-btn { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+    .close-btn:hover, .close-btn:focus { color: white; text-decoration: none; }
+    #poolListContainer { max-height: 60vh; overflow-y: auto; text-align: left; }
+    #poolListContainer h4 { color: #00ffc8; border-bottom: 1px solid #555; padding-bottom: 8px; margin-top: 20px; }
+    #poolListContainer ul { list-style-type: none; padding-left: 10px; }
+    #poolListContainer li { padding: 5px 0; }
+  </style>
+</head>
+<body>
+	<!-- 搜尋欄 -->
+  <div id="searchContainer">
+    <input type="text" id="searchInput" placeholder="🔍 搜尋卡片..." oninput="handleSearch(this.value)" />
+    <div id="searchResults"></div>
+  </div>
+  
+  <h1>🎴 YaMiNo Gamoe! 🎴</h1>
+
+  <!-- 管理區塊 -->
+  <div class="card-section management-section">
+    <h2>✨ 管理卡池 ✨</h2>
+    <button class="drawBtn" style="width:100%; margin-bottom: 10px; background-color: #007bff;" onclick="openPoolListModal()">📜 查看所有卡池列表 📜</button>
+    <button class="drawBtn" style="width:100%; background-color: #dc3545;" onclick="resetPools()">🔄 重設為預設值 🔄</button>
+
+    <h3 style="margin-top:30px;">新增項目</h3>
+    <input type="text" id="newItemInput" placeholder="輸入新項目名稱...">
+    <select id="addPoolSelector">
+        <option value="" disabled selected>-- 選擇要加入的卡池 --</option>
+        <option value="pool">能力</option><option value="racePool">種族</option><option value="WeapenPool">武器</option><option value="TalentPool">特殊天賦</option><option value="PlacePool">地形</option><option value="EventPool">突發事件</option><option value="SummonPool">召喚物</option>
+    </select>
+    <button class="drawBtn" onclick="addItemToPool()">確認新增</button>
+    <div id="addResult" class="message"></div>
+    
+    <hr style="border-color: #444; margin: 30px 0;">
+
+    <h3>移除項目</h3>
+    <select id="removePoolSelector" onchange="populateRemoveItems()">
+        <option value="" disabled selected>-- 1. 先選擇卡池 --</option>
+        <option value="pool">能力</option><option value="racePool">種族</option><option value="WeapenPool">武器</option><option value="TalentPool">特殊天賦</option><option value="PlacePool">地形</option><option value="EventPool">突發事件</option><option value="SummonPool">召喚物</option>
+    </select>
+    <select id="itemToRemoveSelector" disabled><option value="">-- 2. 再選擇要移除的項目 --</option></select>
+    <button id="removeItemBtn" class="drawBtn control-disabled" onclick="removeItemFromPool()" disabled>確認移除</button>
+    <div id="removeResult" class="message"></div>
+  </div>
+
+  <!-- ... (其他抽卡區塊 HTML 維持不變) ... -->
+  <div class="card-section"><h2>卡池一：能力1</h2><button class="drawBtn" onclick="drawCard('result1', pool, this)">DRAW!!!</button><div class="result" id="result1"></div></div>
+  <div class="card-section"><h2>卡池二：能力2</h2><button class="drawBtn" onclick="drawCard('result2', pool, this)">我叫你抽!!!</button><div class="result" id="result2"></div></div>
+  <div class="card-section"><h2>卡池三：能力3</h2><button class="drawBtn" onclick="drawCard('result3', pool, this)">再抽!!!</button><div class="result" id="result3"></div></div>
+  <div class="card-section"><h2>種族抽取</h2><button class="drawBtn" onclick="drawCard('result4', racePool, this)">抽種族!!!</button><div class="result" id="result4"></div></div>
+  <div class="card-section"><h2>武器</h2><button class="drawBtn" onclick="drawCard('result5', WeapenPool, this)">抽武器!!!</button><div class="result" id="result5"></div></div>
+  <div class="card-section"><h2>特殊天賦</h2><button class="drawBtn" onclick="drawCard('result6', TalentPool, this)">抽天賦!!!</button><div class="result" id="result6"></div></div>
+  <div class="card-section"><h2>地形</h2><button class="drawBtn" onclick="drawCard('result7', PlacePool, this)">抽地形!!!</button><div class="result" id="result7"></div></div>
+  <div class="card-section"><h2>突發事件</h2><button class="drawBtn" onclick="drawCard('result8', EventPool, this)">抽事件!!!</button><div class="result" id="result8"></div></div>
+  <div class="card-section"><h2>召喚物</h2><button class="drawBtn" onclick="drawCard('result9', SummonPool, this)">隨便抽!!!</button><div class="result" id="result9"></div></div>
+  
+  <div id="customSearchContainer" style="position: fixed; bottom: 20px; right: 30px; text-align: left; z-index: 999;"><input type="text" id="customSearchInput" placeholder="🔍 搜尋自定清單..." oninput="handleCustomSearch(this.value)" style="padding:10px;font-size:16px;border-radius:8px;border:none;width:200px;"><div id="customSearchResults" style="background-color:#222;color:#0ff;margin-top:5px;border-radius:8px;max-height:300px;overflow-y:auto;font-size:14px;display:none;padding:10px;width:200px;"></div></div>
+  <div id="poolListModal" class="modal"><div class="modal-content"><span class="close-btn" onclick="closePoolListModal()">&times;</span><h2>📜 所有卡池列表 📜</h2><div id="poolListContainer"></div></div></div>
+  
+<script>
+  // [更新] 將黑暗遊戲規則的所有項目加入預設卡池資料
+  let defaultPools = {
+    pool: [
+        // 原有項目
+        "無下限術式.赫 (短距離傳送)(三回合一次)(特殊)(S)", "無下限術式.蒼 (超強化體術)(反應力永久強化)(特殊)(S)", "反轉術式 (A)（只能修復小傷，斷肢需兩回合）", "黑閃 (A)（普通傷害的平方倍）", "十畫咒法 (B)（弱點攻擊）", "詛咒惡魔 (A)（詛咒對手一個負面效果，共三次）", "石化惡魔 (A)（石化對手一回合，冷卻五回合）", "狐狸惡魔 (B)", "十種影法術 (S)", "熔岩", "黑繩（阻斷能力，五回合內燃盡）", "蜘蛛人2099", "海水", "閃光", "雷電", "創造（基礎金屬與元素）", "絲線", "火焰", "神的不在場證明（三回合隱身，冷卻兩回合）", "第三代火焰能力者（熱空氣、電波、惡魔火）", "瞬間移動（兩回合一次）", "複製（複製對手能力一次，最多兩次）", "爆炸", "時間暫停（三次）", "四次元公寓（兩回合躲藏，冷卻三回合）", "血輪眼（進化會失去能力與武器）", "吸血（依傷口吸取）", "生命偷取（少量）", "植物", "東堂的拍手術式", "暗影大人史萊姆（一次核爆）", "惠惠的爆裂魔法（兩次，用後疲勞）", "神盾（免疫攻擊一回合，冷卻三回合）", "死靈法術（召喚死靈軍隊）", "犧牲召喚（召喚基礎能力，五次）", "模仿（體術動作，不含能力）", "超再生（斷肢三回合恢復，冷卻三回合）", "風", "火", "水", "雷", "土", "冰", "太陽", "水晶", "鋼", "One for All", "All for One", "逕庭拳（延遲自動再攻擊）", "延遲傷害（下一回合才造成傷害）", "咒靈操術", "全反擊（物理攻擊反擊一次）", "PLANT//SHAPER（隕石、傳送門，冷卻五回合）", "赤血操術（需流血）", "須佐能呼", "惡魔體（免疫物理攻擊，自我修復）", "波紋", "蜈蚣赫子", "羽赫", "Xeno梟赫子", "螺旋丸", "神威（三回合一次）", "幻術（三回合冷卻）", "召喚幫手（現實人物）", "始解", "卍解", "黑霧", "死亡回歸（兩次）", "煙幕", "無限長繩子", "沙德威斯坦（兩回合，之後當機一回合）", "程式駭入", "王子戰法", "元氣彈", "加力炮", "龜派氣功", "毀滅（三次）", "抹消（五次）", "奈米科技", "無人機控制", "金正恩（核彈與北韓軍隊）", "習近平（核彈與共軍）", "投影咒法", "咒言（語言越強自損越多）", "毒", "仙人跳", "瞬步", "剃（兩回合一次）", "月牙天衝", "聖文字（BLEACH）", "月亮", "日蝕", "特殊召喚", "轉生", "嘴炮（心靈）", "嘴炮（物理）", "酸", "氣彈", "黏黏球", "立場屏障（兩回合物理有效）", "迷因攻擊", "念動力（不能撕裂）", "Sans", "液態氮", "速度與激情", "武裝色", "死靈召喚", "神之義眼", "半冷半熱", "虛閃",
+        // 新增項目
+        "惡靈:夢境惡靈", "惡靈:力量惡靈", "惡靈:死亡惡靈", "惡靈:黑暗惡靈", "惡靈:感官控制惡靈", "想像力(聖文字)", "惡魔果實:岩漿", "惡魔果實:重力", "惡魔果實:閃光", "惡魔果實:幻獸不死鳥", "惡魔果實:幻獸尼卡", "惡魔果實:暗暗", "惡魔果實:四分五裂", "惡魔果實:冰冰", "惡魔果實:震震", "惡魔果實:大佛", "始解:冰輪丸", "始解:流刃若火", "始解:嚴零丸", "始解:雀蜂", "始解:花天狂骨", "始解:鏡花水月", "始解:天鎖斬月", "始解:千本櫻", "始解:飛梅", "始解:蛇尾丸", "始解:風死", "始解:野曬", "始解:三步幻獸", "始解:疋殺地蔵", "始解:雙魚理", "始解:袖白雪", "始解:逆撫", "始解:斷地風", "始解:神槍", "始解:一文字", "卍解:白霞罰", "卍解:雀蜂雷公鞭", "卍解:神殺槍", "卍解:金沙羅舞蹈團", "卍解:皆盡", "卍解:千本櫻景嚴", "卍解:雙王蛇尾丸", "卍解:黑繩天譴明王", "卍解:花天狂骨枯松心中", "卍解:鐵拳斷風", "卍解:大紅蓮冰輪丸", "卍解:逆樣邪八寶塞", "卍解:風死絞繩", "卍解:鏡花水月", "卍解:觀音開紅姬改", "聖文字:對立", "聖文字:調和", "聖文字:強制執行", "聖文字:致死量", "聖文字:爆擊", "聖文字:恐懼", "聖文字:貪吃", "聖文字:灼熱", "聖文字:鋼鐵", "聖文字:監獄", "聖文字:愛(控制)", "聖文字:奇蹟", "聖文字:虐殺", "聖文字:力量", "聖文字:異議", "聖文字:咆嘯", "聖文字:英雄", "聖文字:雷霆", "聖文字:無防備", "聖文字:風", "聖文字:貫穿", "聖文字:模仿", "聖文字:身體控制", "聖文字:消失點", "聖文字:生命力", "負面效果:流血", "負面效果:凍結", "負-防禦下降", "負-易傷", "負-行動遲緩", "負-觸電", "負-頭暈", "負-噁心", "負-疲勞", "負-消極", "負-身體殘缺", "負-感電", "持續傷害:流血", "持續傷害:凍傷", "持續傷害:燃燒", "持續傷害:觸電", "持續傷害:頭暈", "持續傷害:噁心", "持續傷害:疲勞", "持續傷害:行動遲緩", "持續傷害:心靈創傷", "持續傷害:身體殘缺", "持續傷害:消極", "魔虛羅", "替身:綠色法皇", "替身:白金世界", "替身:世界", "替身:瘋狂鑽石", "替身:黃金體驗", "替身:白蛇", "替身:轟炸空間", "替身:死神13", "替身:戀人", "替身:牙", "替身:D4C", "替身:克林姆王", "替身:鋼鍊手指", "替身:性感手槍", "替身:皇帝", "替身:回音", "替身:殺手皇后", "Ben10:火焰人", "Ben10:轟天雷", "Ben10:鑽石戰神", "Ben10:寒冰幽靈", "Ben10:神力暴龍", "Ben10:沼澤火", "Ben10:時鐘王", "Ben10:快閃之星", "Ben10:變形魔", "Ben10:猛爆蟲", "Ben10:克蟹蟲龍", "Ben10:叛努辛獸", "Ben10:終極寒冰幽靈", "Ben10:終極神力暴龍", "Ben10:終極沼澤火", "Ben10:異形暴龍", "Ben10:X金剛", "Ben10:四手暴龍", "Ben10:電蜥", "Ben10:超巨人", "Ben10:重力蟹霸", "Ben10:積木猩", "Ben10:原能金剛", "乙骨優太{里香}", "T.H.E REAL MIMIC", "三幻神", "黑暗大法師", "究級青眼白龍", "宿儺.伏黑", "鏈鋸人[波奇塔]", "尾獸化", "♂ VaN vAn♂ 大法師", "自在極易", "牙ACT1234", "迪亞哥世界", "殘火太刀", "山道猴子的一生", "Jonh Wick[憤怒]", "XZ軍團", "狀態[???]", "殺手皇后.敗者食塵"
+    ],
+    racePool: [
+        // 原有項目
+        "天使", "精靈", "機器人", "鏈鋸人", "武士刀人", "宇志波佐助", "宇志波鼬", "宇志波止水", "宇志波班", "宇志波帶土", "人類", "魚人", "吸血鬼", "魚族", "龍族", "死神", "不死族", "五條家(行動強化)", "禪院家(體術強化)", "青眼白龍", "黑色石板", "藍色鎧甲", "七夕祭", "銀河守護者", "海賊王", "蜘蛛俠", "鋼鐵人", "神奇女俠", "蝙蝠俠", "冰與火之歌", "神秘小隊", "破壞神", "暗殺者", "幻影旅團", "死侍", "獵人協會", "火影忍者", "高達", "賽亞人", "超人",
+        // 新增項目
+        "鬼族", "青蛙人", "焰人", "乙骨優太(魔法類攻擊強化)", "強化人", "神族(legand)", "米洛斯", "氾.達克霍姆", "森之妖精.彼立海靈頓", "兩面宿儺", "旋渦一族", "黑人", "放火", "訓獸師", "羅莉控", "男生", "女生", "小孩", "矮人", "哥布林", "巨人", "黑旗一戶", "神職", "修道士", "超聰明", "烏鴉", "訓龍者", "少林寺銅人", "John Wick(基奴李維)", "瑟瑟武士", "駭客", "韓氏家族(韓X運)", "宅男", "肥宅", "替身使者", "術師", "滅卻師", "戰鬥天才", "猴子", "XZ", "范馬一族", "小丑", "魔術師", "怪獸", "鳥人", "天空族", "特殊超人類", "屁孩", "超弱的人", "貴族", "天才劍士", "更木劍八"
+    ],
+    WeapenPool: [
+        // 原有項目
+        "惡魔果實","炎魔刀(vergil)","時空刃","勝利誓約之劍","撒旦刃","造船模擬器的槌子","法杖", "域門疆(封鎖對手一項能力20回合)","七海的鉈刀(七海)","乙骨的武士刀(乙骨)","性轉藥水","匕首", "小刀","飛刀","天鎖斬月","拳套","甩棍","雙刀流","三刀流","神器劍","雙槍","烏茲","RPG","噴子","雙節棍", "神之斧","十字努","卍","斬魄刀","YAMAHA TMAX 560重機","求道玉","信夫的拳頭","噴火器","手炮","朗基努斯之槍", "盾牌","武士刀","天逆牟","三結天盾","三節棍","馬桶塞",
+        // 新增項目
+        "弓"
+    ],
+    TalentPool: [
+        "自殘","舔血","感電","預知未來(一次敵人行動)(兩回合一次)", "六眼[無下限](若有蒼或赫其中一種直接進階成無下限術式{六眼})(特殊)(可使用無下限1回合,冷卻3回合,不限次)","呼吸法(強化身體)", "黑閃(強化能力)","彩虹(男同)","元素抵抗","天生的強運(免疫三次攻擊)","詛咒(對敵人施加一層負面效果)", "六眼[普通](開啟可獲得超感官3回合,5回合冷卻,不限次)","完美控制","極速","支配","傲慢","心靈感應", "心眼","仙人體","天體","惡靈體質(每三回合出現一隻惡靈進行無差別攻擊)","不幸(每5回合一項能力不能使用)","天與咒縛", "天身的強者","鎖血(一旦受到持續傷害or一擊斃殺則直接無效化,否則不死)","身體殘缺:(腳殘,斷手,眼瞎)","冷靜", "霸王色霸氣","超神級反應力"
+    ],
+    PlacePool: [
+        "平地","山地","台地","盆地","虛空站台","太空","火山","韓的後山","城市","海洋", "空島","小島","竹林後山","信夫阿公家","學校","那美剋星","沙漠","台七乙","摩艾石像陣", "怪獸宇宙","沼澤","火影村"
+    ],
+    EventPool: [
+        "隕石來襲","火山爆發","海嘯","血月", "商人[出現3回合](使用自身能力隨機抽取一項能力(一人一次)，使用武器隨機抽取一次武器，使用一項能力隨機抽取一次地形，使用100元來購買一個能力或武器位置)(擁有[強運]天賦能免費兌換一次上述一項商品)", "無","下雨","下酸雨","全體縮小","落雷","殭屍危機","回合縮短"
+    ],
+    SummonPool: [
+        // 原有項目
+        "黑洞(只能吸東西或人,每個黑洞存在一回合(共五次))","靈鹿","聖誕阿公的雪橇跟坐騎","韓的麥卡倫","信夫的西瓜","精靈","魔法書", "里香(十回合召喚一次,共持續三回合,共召喚3次(可發射咒力大砲,複製對手一樣能力並使用一次直到里香消失)(與乙骨優太搭配能變為完全體)(特殊))", "模仿者的面具(特殊)(模仿對手一個能力三回合兩次)","太陽龍", "遊戲王的卡片(可抽10次,種類:青眼白龍(最多抽到三張)[特殊],黑暗大法師(最多抽到5張)[特殊],死者復甦(最多抽到兩張),{歐西里斯天空龍,太陽神的翼神龍,歐貝利斯克巨神兵}[特殊],強欲之壺(多抽兩次卡,最多使用3次),落雷)", "波奇塔","九喇嘛","傳奇寶相","男同寶相","日蝕龍","月亮龍","中國龍","狗勾","蜜蜂龍","惡靈","女朋友","怪獸宇宙傳送器","怪獸","傳送門的傳送槍","充氣娃娃","恐龍狗",
+        // 新增項目
+        "怪獸:哥吉拉", "怪獸:拉頓", "怪獸:摩斯拉", "怪獸:基多拉", "怪獸:慕托", "怪獸:至尊莫托", "怪獸:蓋鋼", "怪獸:貝西摩斯", "怪獸:平成哥吉拉"
+    ]
+  };
+  
+  // 初始化卡池變數
+  let pool, racePool, WeapenPool, TalentPool, PlacePool, EventPool, SummonPool;
+
+  const customList = [ "斬月", "漆黑之刃", "魔王的詛咒", "蘿莉控", "獸耳控", "比基尼戰士", "史萊姆之王", "影分身術", "變身術", "高達變形", "情緒操控", "時光機", "小當家炒飯", "重力法則" ];
+  const timers = {};
+  const STORAGE_KEY = 'yamiNoGamePools';
+
+  /* === 資料儲存、讀取、重設的核心函式 === */
+  function savePoolsToLocalStorage() { const allPools = { pool, racePool, WeapenPool, TalentPool, PlacePool, EventPool, SummonPool }; localStorage.setItem(STORAGE_KEY, JSON.stringify(allPools)); }
+  function loadPoolsFromLocalStorage() { const savedData = localStorage.getItem(STORAGE_KEY); if (savedData) { try { const loadedPools = JSON.parse(savedData); const poolsToLoad = JSON.parse(JSON.stringify(defaultPools)); for (const key in poolsToLoad) { if (loadedPools[key]) { poolsToLoad[key] = loadedPools[key]; } } pool = poolsToLoad.pool; racePool = poolsToLoad.racePool; WeapenPool = poolsToLoad.WeapenPool; TalentPool = poolsToLoad.TalentPool; PlacePool = poolsToLoad.PlacePool; EventPool = poolsToLoad.EventPool; SummonPool = poolsToLoad.SummonPool; } catch (e) { console.error("讀取儲存資料時出錯，將使用預設值:", e); const initialPools = JSON.parse(JSON.stringify(defaultPools)); Object.assign(window, initialPools); } } else { const initialPools = JSON.parse(JSON.stringify(defaultPools)); pool = initialPools.pool; racePool = initialPools.racePool; WeapenPool = initialPools.WeapenPool; TalentPool = initialPools.TalentPool; PlacePool = initialPools.PlacePool; EventPool = initialPools.EventPool; SummonPool = initialPools.SummonPool; } }
+  function resetPools() { if (confirm("您確定要清除所有自訂變更，並還原成預設卡池嗎？這個操作無法復原。")) { localStorage.removeItem(STORAGE_KEY); alert("資料已重設！頁面將重新載入以套用預設值。"); location.reload(); } }
+
+  /* --- 修改原有函式以觸發儲存 --- */
+  function addItemToPool() { const newItemInput = document.getElementById('newItemInput'); const poolSelector = document.getElementById('addPoolSelector'); const addResultDiv = document.getElementById('addResult'); const itemName = newItemInput.value.trim(); const selectedPoolName = poolSelector.value; if (!itemName) { addResultDiv.textContent = '錯誤：項目名稱不能為空！'; addResultDiv.style.color = '#dc3545'; return; } if (!selectedPoolName) { addResultDiv.textContent = '錯誤：請選擇一個卡池！'; addResultDiv.style.color = '#dc3545'; return; } const targetPool = getPoolByName(selectedPoolName); if(targetPool) { targetPool.push(itemName); addResultDiv.textContent = `成功將「${itemName}」加入卡池！`; addResultDiv.style.color = '#28a745'; newItemInput.value = ''; savePoolsToLocalStorage(); setTimeout(() => { addResultDiv.textContent = ''; }, 3000); } }
+  function removeItemFromPool() { const poolSelector = document.getElementById('removePoolSelector'); const itemSelector = document.getElementById('itemToRemoveSelector'); const removeResultDiv = document.getElementById('removeResult'); const selectedPoolName = poolSelector.value; const selectedItemName = itemSelector.value; if (!selectedPoolName) { removeResultDiv.textContent = '錯誤：請先選擇卡池！'; removeResultDiv.style.color = '#dc3545'; return; } if (!selectedItemName) { removeResultDiv.textContent = '錯誤：請選擇要移除的項目！'; removeResultDiv.style.color = '#dc3545'; return; } const targetPool = getPoolByName(selectedPoolName); const itemIndex = targetPool.indexOf(selectedItemName); if (itemIndex > -1) { targetPool.splice(itemIndex, 1); removeResultDiv.textContent = `成功將「${selectedItemName}」移除！`; removeResultDiv.style.color = '#28a745'; savePoolsToLocalStorage(); populateRemoveItems(); setTimeout(() => { removeResultDiv.textContent = ''; }, 3000); } else { removeResultDiv.textContent = '錯誤：找不到該項目，可能已被移除。'; removeResultDiv.style.color = '#dc3545'; } }
+
+  /* --- 其他函式 (抽卡, 搜尋, 彈出視窗等) 維持不變 --- */
+  function drawCard(resultId, cardArray, btn) { if(timers[resultId]) return; const resultElem = document.getElementById(resultId); resultElem.textContent = ""; btn.style.transition = 'transform 0.1s ease'; btn.style.transform = 'translateX(10px)'; setTimeout(() => { btn.style.transform = 'translateX(0px)'; }, 100); let totalSteps = 15, step = 0; if (!cardArray || cardArray.length === 0) { resultElem.textContent = "卡池為空！"; return; } const finalCard = cardArray[Math.floor(Math.random() * cardArray.length)]; function animate() { if(step >= totalSteps) { let text = finalCard; if(text.length > 10) { text = text.slice(0, 10) + '\n' + text.slice(10); } resultElem.textContent = text; timers[resultId] = null; return; } resultElem.textContent = cardArray[Math.floor(Math.random() * cardArray.length)]; let delay = Math.floor(30 * Math.pow(1.15, step)); timers[resultId] = setTimeout(() => { step++; animate(); }, delay); } animate(); }
+  function handleSearch(keyword) { const resultsDiv = document.getElementById("searchResults"); const lowerKeyword = keyword.toLowerCase().trim(); if (!lowerKeyword) { resultsDiv.style.display = "none"; resultsDiv.innerHTML = ""; return; } const allCards = [ ...pool, ...racePool, ...WeapenPool, ...TalentPool, ...PlacePool, ...EventPool, ...SummonPool ]; const matches = allCards.filter(item => item.toLowerCase().includes(lowerKeyword)); resultsDiv.innerHTML = matches.length === 0 ? "<em>沒有找到符合的結果</em>" : matches.map(match => `<div>• ${match}</div>`).join(""); resultsDiv.style.display = "block"; }
+  function handleCustomSearch(keyword) { const resultsDiv = document.getElementById("customSearchResults"); const lowerKeyword = keyword.toLowerCase().trim(); if (!lowerKeyword) { resultsDiv.style.display = "none"; resultsDiv.innerHTML = ""; return; } const matches = customList.filter(item => item.toLowerCase().includes(lowerKeyword)); resultsDiv.innerHTML = matches.length === 0 ? "<em>沒有找到符合的結果</em>" : matches.map(match => `<div>• ${match}</div>`).join(""); resultsDiv.style.display = "block"; }
+  function getPoolByName(poolName) { switch (poolName) { case 'pool': return pool; case 'racePool': return racePool; case 'WeapenPool': return WeapenPool; case 'TalentPool': return TalentPool; case 'PlacePool': return PlacePool; case 'EventPool': return EventPool; case 'SummonPool': return SummonPool; default: return null; } }
+  function populateRemoveItems() { const poolSelector = document.getElementById('removePoolSelector'); const itemSelector = document.getElementById('itemToRemoveSelector'); const removeBtn = document.getElementById('removeItemBtn'); const selectedPoolName = poolSelector.value; itemSelector.innerHTML = '<option value="">-- 2. 再選擇要移除的項目 --</option>'; if (!selectedPoolName) { itemSelector.disabled = true; removeBtn.disabled = true; removeBtn.classList.add('control-disabled'); return; } const targetPool = getPoolByName(selectedPoolName); if (targetPool && targetPool.length > 0) { targetPool.forEach(item => { const option = document.createElement('option'); option.value = item; option.textContent = item; itemSelector.appendChild(option); }); itemSelector.disabled = false; removeBtn.disabled = false; removeBtn.classList.remove('control-disabled'); } else { itemSelector.disabled = true; removeBtn.disabled = true; removeBtn.classList.add('control-disabled'); } }
+  const modal = document.getElementById('poolListModal');
+  function openPoolListModal() { const container = document.getElementById('poolListContainer'); container.innerHTML = ''; const allPools = { '能力': pool, '種族': racePool, '武器': WeapenPool, '特殊天賦': TalentPool, '地形': PlacePool, '突發事件': EventPool, '召喚物': SummonPool }; for (const poolTitle in allPools) { const poolArray = allPools[poolTitle]; const titleElem = document.createElement('h4'); titleElem.textContent = `${poolTitle} (${poolArray.length} 項)`; container.appendChild(titleElem); const listElem = document.createElement('ul'); if(poolArray.length > 0) { poolArray.forEach(item => { const itemElem = document.createElement('li'); itemElem.textContent = item; listElem.appendChild(itemElem); }); } else { const emptyElem = document.createElement('li'); emptyElem.textContent = '此卡池目前為空'; emptyElem.style.fontStyle = 'italic'; emptyElem.style.opacity = '0.6'; listElem.appendChild(emptyElem); } container.appendChild(listElem); } modal.style.display = 'block'; }
+  function closePoolListModal() { modal.style.display = 'none'; }
+  window.onclick = function(event) { if (event.target == modal) { closePoolListModal(); } }
+
+  // --- 頁面載入時，立即執行讀取 ---
+  loadPoolsFromLocalStorage();
+
+</script>
+</body>
+</html>

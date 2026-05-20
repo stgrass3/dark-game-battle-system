@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARK GAME - Rules</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --void-black: #0a0a0f; --deep-void: #12121a; --blood-crimson: #dc143c; --electric-cyan: #00f5ff; --gold-ember: #ff8c00; --soul-purple: #9932cc; --grey-dim: #404050; --grey-mid: #606070; }
+        body { font-family: 'Rajdhani', sans-serif; background: var(--void-black); color: #fff; line-height: 1.6; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: var(--deep-void); border-bottom: 1px solid var(--grey-dim); }
+        .logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 4px; background: linear-gradient(90deg, var(--blood-crimson), var(--soul-purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .back-link { color: var(--grey-mid); text-decoration: none; font-size: 1rem; }
+        .back-link:hover { color: var(--gold-ember); }
+        .container { max-width: 900px; margin: 0 auto; padding: 40px 20px; }
+        h1 { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; text-align: center; margin-bottom: 40px; letter-spacing: 4px; }
+        h2 { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; color: var(--electric-cyan); margin: 30px 0 15px; border-bottom: 1px solid var(--grey-dim); padding-bottom: 10px; }
+        h3 { color: var(--gold-ember); margin: 20px 0 10px; }
+        p { margin: 10px 0; color: #ccc; }
+        ul { margin: 10px 0 20px 20px; }
+        li { margin: 8px 0; color: #ccc; }
+        ol { margin: 10px 0 20px 20px; }
+        .card-type { display: inline-block; padding: 3px 10px; border-radius: 4px; font-size: 0.85rem; margin: 2px; }
+        .card-race { background: rgba(153, 50, 204, 0.3); border: 1px solid var(--soul-purple); }
+        .card-weapon { background: rgba(255, 140, 0, 0.3); border: 1px solid var(--gold-ember); }
+        .card-ability { background: rgba(0, 245, 255, 0.3); border: 1px solid var(--electric-cyan); }
+        .card-entity { background: rgba(220, 20, 60, 0.3); border: 1px solid var(--blood-crimson); }
+        .highlight { color: var(--gold-ember); font-weight: 600; }
+        .note { background: rgba(0, 0, 0, 0.3); border-left: 3px solid var(--soul-purple); padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0; }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">DARK GAME</div>
+        <a href="index.html" class="back-link">← 返回 / Back</a>
+    </header>
+
+    <div class="container">
+        <h1>DARK GAME 規則 / RULES</h1>
+
+        <h2>遊戲介紹 / Introduction</h2>
+        <p>DARK GAME 是一個<span class="highlight">純想像力的卡牌對戰系統</span>。不是比較誰的牌更強，而是用你的創意和描述來贏得辯論。</p>
+        <p>DARK GAME is a <span class="highlight">pure imagination-based card battle</span> system. It's not about whose cards are stronger—it's about using your creativity and narration to win debates.</p>
+
+        <div class="note">
+            <strong>核心原則 / Core Principle:</strong><br>
+            沒有數值計算、沒有傷害公式、沒有自動判定。<br>
+            No damage calculation, no formulas, no automatic resolution.
+        </div>
+
+        <h2>卡牌類型 / Card Types</h2>
+        <p>每位玩家抽取6張卡牌 / Each player draws 6 cards:</p>
+        <ul>
+            <li><span class="card-type card-race">種族 / Race</span> - 角色的起源 Your character's origin (例如: 賽亞人, 魔法師)</li>
+            <li><span class="card-type card-weapon">武器 / Weapon</span> - 裝備 Equipment (例如: 妖刀, 鎖鏈)</li>
+            <li><span class="card-type card-ability">能力 / Ability</span> ×3 - 技能 Techniques (例如: 黑閃, 時間暫停)</li>
+            <li><span class="card-type card-entity">召喚物 / Entity</span> - 夥伴 Companion (例如: 九尾, 烏爾媞婁)</li>
+        </ul>
+
+        <h2>戰鬥流程 / Battle Flow</h2>
+        <h3>1. 回合制 / Turn-based</h3>
+        <p>玩家輪流描述自己的攻擊。輪到你時，你的面板會發光提示。</p>
+        <p>Players take turns describing attacks. When it's your turn, your panel glows.</p>
+
+        <h3>2. 描述攻擊 / Describe Attack</h3>
+        <p>用文字描述你的攻擊！可以提到你的卡牌來加成描述，但並非必須。</p>
+        <p>Describe your attack in text! You can reference your cards to enhance descriptions, but it's not required.</p>
+
+        <h3>3. 結束回合 / End Turn</h3>
+        <p>說完攻擊後，點擊"結束回合"讓對手行動。</p>
+        <p>After your attack, click "End Turn" to let your opponent act.</p>
+
+        <h2>辯論系統 / Debate System</h2>
+        <p>如果雙方對某個攻擊有爭議 / If both players disagree on an attack:</p>
+        <ol>
+            <li>進攻方開始敘述攻擊 / Attacker describes their attack</li>
+            <li>防守方可以點擊"辯論"來挑戰 / Defender can click "Debate" to challenge</li>
+            <li>雙方各自論述 / Both argue their case</li>
+            <li>由<strong>進攻方</strong>決定結果 / Attacker decides the result:
+                <ul>
+                    <li><span class="highlight">算我贏 (Counts)</span> - 攻擊成功 / Attack succeeds</li>
+                    <li><span class="highlight">不算 (Void)</span> - 攻擊無效 / Attack is voided</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h2>被動效果 / Passive Effects</h2>
+        <p>某些卡牌有被動關鍵字（如: 舔血、吸收、再生）。當觸發條件滿足時，系統會提示你描述被動效果。</p>
+        <p>Some cards have passive keywords (e.g., 舔血, 吸收, 再生). When triggered, the system prompts you to describe the passive effect.</p>
+
+        <h2>勝利條件 / Victory Conditions</h2>
+        <ul>
+            <li><span class="highlight">投降 / Surrender</span> - 點擊投降按鈕認輸 / Click surrender button</li>
+            <li><span class="highlight">死亡 / Death</span> - 在敘述中宣佈自己的角色死亡 / Declare your character dead in narration</li>
+            <li><span class="highlight">自爆 / Self-Sacrifice</span> - 敘述自爆攻擊 / Describe a self-destruct attack</li>
+        </ul>
+
+        <h2>小技巧 / Tips</h2>
+        <ul>
+            <li>不要只說"我攻擊"，要描述動作、氣氛、角色的心態 / Don't just say "I attack"—describe the action, atmosphere, character's mindset</li>
+            <li>利用卡牌名稱來啟發創意，但不要被限制 / Use card names to inspire creativity, but don't be limited by them</li>
+            <li>辯論時保持尊重，贏了要優雅，輸了要大方 / Stay respectful during debates. Win with grace, lose with dignity</li>
+        </ul>
+
+        <h2>享受想像力的戰鬥吧！</h2>
+        <p>Enjoy the battle of imagination!</p>
+    </div>
+</body>
+</html>

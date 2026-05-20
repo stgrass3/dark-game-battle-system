@@ -1,0 +1,45 @@
+{
+  "framework": null,
+  "installCommand": "npm install",
+  "rewrites": [
+    {
+      "source": "/api/pools",
+      "destination": "/api/pools"
+    },
+    {
+      "source": "/api/search/:keyword",
+      "destination": "/api/search/:keyword"
+    },
+    {
+      "source": "/api/draw/hand",
+      "destination": "/api/draw/hand"
+    },
+    {
+      "source": "/api/room/create",
+      "destination": "/api/room/create"
+    },
+    {
+      "source": "/api/room/join",
+      "destination": "/api/room/join"
+    },
+    {
+      "source": "/api/cards/hand",
+      "destination": "/api/cards/hand"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/public/$1"
+    }
+  ],
+  "outputDirectory": "public",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "dark-game-battle",
+  "main": "src/party/index.ts",
+  "compatibilityDate": "2024-01-01",
+  "partykit": {
+    "devPort": 1999
+  }
+}
