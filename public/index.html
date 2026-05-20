@@ -581,12 +581,10 @@
   <div class="room-full-notification" id="room-full-notification"></div>
 
   <script>
-  <script>
     const API_URL = ''; // empty = same origin (works on Vercel AND localhost)
 
-    // Railway WebSocket server URL (update after first Railway deploy):
-    // Run: cd ws-server && npx railway up, then replace the URL below
-    const PARTYKT_HOST = window.location.hostname === 'localhost' ? 'localhost:3000' : 'dark-game-ws-server.railway.app';
+    // WebSocket server — update with your Render/Railway deployment URL
+    const PARTYKT_HOST = window.location.hostname === 'localhost' ? 'localhost:3000' : 'dark-game-battle-system.onrender.com';
 
     let pools = {};
     let currentLang = 'en';

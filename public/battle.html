@@ -975,7 +975,7 @@
 
         // Railway WebSocket server — set from query param or default to localhost
         const params = new URLSearchParams(window.location.search);
-        const WS_HOST = params.get('partyHost') || (window.location.hostname === 'localhost' ? 'localhost:3000' : 'dark-game-ws-server.railway.app');
+        const WS_HOST = params.get('partyHost') || (window.location.hostname === 'localhost' ? 'localhost:3000' : 'dark-game-battle-system.onrender.com');
 
         const i18n = {
             zh: {
