@@ -23,6 +23,7 @@ export default class BattleRoom implements Party.Server {
 
     constructor(room: Party.Room, hostId: string) {
         this.room = room;
+        // Always start fresh — wipe any ghost state from a previous room instance
         this.state = {
             code: room.id,
             phase: 'lobby',
@@ -391,13 +392,9 @@ export const onConnect = async (
     room: Party.Room,
     ctx: Party.ConnectionContext,
 ) => {
-    // Get or create the BattleRoom instance for this room ID
-    let battleRoom = (room as any)._battleRoom as BattleRoom | undefined;
-    if (!battleRoom) {
-        // Use the room ID as a placeholder hostId; assignPlayerSlot corrects this
-        battleRoom = new BattleRoom(room, `placeholder-host-${room.id}`);
-        (room as any)._battleRoom = battleRoom;
-    }
+    // Always create fresh state — wipes ghost state from previous room instance
+    const battleRoom = new BattleRoom(room, `placeholder-host-${room.id}`);
+    (room as any)._battleRoom = battleRoom;
 
     await battleRoom.onConnect(conn, ctx);
 };
