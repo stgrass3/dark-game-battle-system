@@ -1,6 +1,7 @@
 {
   "name": "dark-game-battle-system",
   "version": "1.0.0",
+  "type": "module",
   "description": "DARK GAME - Real-time multiplayer card battle game",
   "main": "src/server.js",
   "scripts": {

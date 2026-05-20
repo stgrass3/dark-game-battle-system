@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { cardPools } from '../src/data/pools';
-import type { Hand } from '../src/types';
+import { cardPools } from '../../src/data/pools';
+import type { Hand } from '../../src/types';
 
 function generateId(): string {
     return Math.random().toString(36).substr(2, 9).toUpperCase();
