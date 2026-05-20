@@ -8,7 +8,7 @@
 |---|---|---|
 | Frontend | Vanilla HTML/CSS/JS | Battle arena, lobby, card pools |
 | REST API | Vercel / `@vercel/node` | Room bootstrap, card draws |
-| WebSocket | PartyKit | Real-time battle state, turn switching, debate |
+| WebSocket | RAILWAY | Real-time battle state, turn switching, debate |
 | Card Pools | TypeScript | ~500 bilingual cards (JP/ZH/EN) |
 
 ## Architecture
