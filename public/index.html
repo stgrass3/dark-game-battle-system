@@ -580,7 +580,13 @@
   <div class="kicked-notification" id="kicked-notification"></div>
   <div class="room-full-notification" id="room-full-notification"></div>
 
-  <script src="https://unpkg.com/partysocket@1.0.2/dist/index.js"></script>
+  <script>
+    // Load PartySocket as ES module and expose globally
+    (async function () {
+      const mod = await import('https://unpkg.com/partysocket@1.0.2/dist/index.js');
+      window.PartySocket = mod.default || mod.PartySocket;
+    })();
+  </script>
   <script>
     const API_URL = ''; // empty = same origin (works on Vercel AND localhost)
 
@@ -793,7 +799,14 @@
       `;
     }
 
-    function connectLobbySocket() {
+    async function connectLobbySocket() {
+      // Wait for PartySocket to load (async script)
+      const start = Date.now();
+      while (!window.PartySocket) {
+        if (Date.now() - start > 5000) throw new Error('PartySocket failed to load');
+        await new Promise(r => setTimeout(r, 50));
+      }
+
       if (lobbySocket) {
         lobbySocket.close();
       }
@@ -906,7 +919,9 @@
         document.getElementById('room-overlay').classList.add('active');
         document.getElementById('btn-start-battle').disabled = true;
 
-        connectLobbySocket();
+        connectLobbySocket().catch(err => {
+          console.error('Lobby socket error:', err);
+        });
       } catch (err) {
         console.error('Create room error:', err);
         alert('Error: ' + err.message);
@@ -966,7 +981,9 @@
         document.getElementById('btn-start-battle').style.display = 'none';
         document.getElementById('btn-kick-player').style.display = 'none';
 
-        connectLobbySocket();
+        connectLobbySocket().catch(err => {
+          console.error('Join room error:', err);
+        });
       } catch (err) {
         console.error('Join room error:', err);
         alert('Error: ' + err.message);
