@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { cardPools } from '../src/data/pools';
+import { cardPools } from '../data';
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -11,9 +11,8 @@ export default function handler(req: VercelRequest, res: VercelResponse) {
     const lang = (req.query.lang as string) || 'en';
 
     const pools: Record<string, string[]> = {};
-
-    const getCards = (pool: [string, string][]): string[] =>
-        pool.map(card => (lang === 'en' || lang === 'en-US') ? card[1] : card[0]);
+    const getCards = (pool: string[][]) =>
+        pool.map(card => lang === 'en' ? (card[1] || card[0]) : (card[0] || card[1]));
 
     pools.abilities = getCards(cardPools.pool);
     pools.races = getCards(cardPools.racePool);

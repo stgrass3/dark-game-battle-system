@@ -1,19 +1,5 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-function generateId(): string {
-    return Math.random().toString(36).substr(2, 9).toUpperCase();
-}
-
-function generateRoomCode(): string {
-    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-}
-
-const cardPools = {
+// Shared card pool data — fully self-contained, no relative imports from src/
+export const cardPools = {
     pool: [
         ["無下限術式.赫","Cursed Technique: Red"],["無下限術式.蒼","Cursed Technique: Blue"],
         ["反轉術式","Reverse Cursed Technique"],["黑閃","Black Flash"],
@@ -62,22 +48,6 @@ const cardPools = {
         ["死靈召喚","Necromancy Summon"],["神之義眼","Divine Ancestral Eye"],
         ["半冷半熱","Half Cold Half Hot"],["虛閃","Cero"],
         ["惡靈","Evil Spirit"],["想像力","Imagination"],
-        ["惡魔果實:岩漿","Devil Fruit: Magma"],["惡魔果實:重力","Devil Fruit: Gravity"],
-        ["惡魔果實:閃光","Devil Fruit: Light"],["惡魔果實:幻獸不死鳥","Devil Fruit: Phoenix"],
-        ["惡魔果實:幻獸尼卡","Devil Fruit: Nika"],["惡魔果實:暗暗","Devil Fruit: Dark-Dark"],
-        ["惡魔果實:四分五裂","Devil Fruit: Chop-Chop"],["惡魔果實:冰冰","Devil Fruit: Ice-Ice"],
-        ["惡魔果實:震震","Devil Fruit: Quake-Quake"],["惡魔果實:大佛","Devil Fruit: Buddha"],
-        ["聖文字:對立","Schrift: Oppose"],["聖文字:調和","Schrift: Balance"],
-        ["聖文字:強制執行","Schrift: Enforce"],["聖文字:致死量","Schrift: Lethal Dose"],
-        ["聖文字:爆擊","Schrift: Critical"],["聖文字:恐懼","Schrift: Fear"],
-        ["聖文字:貪吃","Schrift: Gluttony"],["聖文字:灼熱","Schrift: Blazing"],
-        ["聖文字:鋼鐵","Schrift: Steel"],["聖文字:監獄","Schrift: Jail"],
-        ["聖文字:愛","Schrift: Love"],["聖文字:奇蹟","Schrift: Miracle"],
-        ["聖文字:虐殺","Schrift: Slaughter"],["聖文字:力量","Schrift: Power"],
-        ["聖文字:異議","Schrift: Dissent"],["聖文字:咆嘯","Schrift: Roar"],
-        ["聖文字:英雄","Schrift: Hero"],["聖文字:雷霆","Schrift: Thunder"],
-        ["聖文字:無防備","Schrift: None-Defense"],["聖文字:風","Schrift: Wind"],
-        ["聖文字:貫穿","Schrift: Penetrate"],["聖文字:模仿","Schrift: Mimic"],
         ["負面效果:流血","Debuff: Bleed"],["負面效果:凍結","Debuff: Freeze"],
         ["持續傷害:流血","DoT: Bleed"],["持續傷害:凍傷","DoT: Frostbite"],
         ["持續傷害:燃燒","DoT: Burn"],["持續傷害:觸電","DoT: Shock"],
@@ -182,9 +152,9 @@ const cardPools = {
     ],
 };
 
-type Hand = { race: string; weapon: string; abilities: [string, string, string]; entity: string };
+export type Hand = { race: string; weapon: string; abilities: [string, string, string]; entity: string };
 
-function drawHand(lang: string): Hand {
+export function drawHand(lang: string): Hand {
     const draw = (pool: string[][]) => {
         const c = pool[Math.floor(Math.random() * pool.length)];
         return lang === 'en' ? (c[1] || c[0]) : (c[0] || c[1]);
@@ -195,31 +165,4 @@ function drawHand(lang: string): Hand {
         abilities: [draw(cardPools.pool), draw(cardPools.pool), draw(cardPools.pool)] as [string, string, string],
         entity: draw(cardPools.SummonPool),
     };
-}
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    if (req.method === 'OPTIONS') { res.status(200).end(); return; }
-    if (req.method !== 'POST') { res.status(405).json({ error: 'Method not allowed' }); return; }
-
-    const { playerName, lang = 'en' } = req.body || {};
-
-    if (!playerName || typeof playerName !== 'string' || !playerName.trim()) {
-        res.status(400).json({ error: 'playerName required' });
-        return;
-    }
-
-    const roomCode = generateRoomCode();
-    const playerId = generateId();
-    const hand = drawHand(lang as string);
-
-    res.status(200).json({
-        roomCode,
-        playerId,
-        hand,
-        phase: 'lobby',
-        partyUrl: `wss://dark-game-battle.stgrass3.partykit.dev/room/${roomCode}`,
-    });
 }

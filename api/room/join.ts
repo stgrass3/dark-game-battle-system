@@ -1,20 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { cardPools } from '../../src/data/pools';
-import type { Hand } from '../../src/types';
+import { cardPools } from '../data';
 
 function generateId(): string {
     return Math.random().toString(36).substr(2, 9).toUpperCase();
-}
-
-function drawHand(lang: string): Hand {
-    const drawFrom = (pool: [string, string][]) =>
-        (lang === 'en' ? pool[Math.floor(Math.random() * pool.length)][1] : pool[Math.floor(Math.random() * pool.length)][0]);
-    return {
-        race: drawFrom(cardPools.racePool),
-        weapon: drawFrom(cardPools.WeapenPool),
-        abilities: [drawFrom(cardPools.pool), drawFrom(cardPools.pool), drawFrom(cardPools.pool)],
-        entity: drawFrom(cardPools.SummonPool),
-    };
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -32,6 +20,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const playerId = generateId();
+    const { drawHand } = await import('../data');
     const hand = drawHand(lang as string);
 
     res.status(200).json({
