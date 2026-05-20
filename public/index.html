@@ -743,7 +743,7 @@
       if (!keyword) { renderPools(); return; }
 
       try {
-        const res = await fetch(`${API_URL}/api/search/${encodeURIComponent(keyword)}`);
+        const res = await fetch(`${API_URL}/api/search?q=${encodeURIComponent(keyword)}`);
         const results = await res.json();
         const allMatches = [];
         for (const [poolName, cards] of Object.entries(results)) {
