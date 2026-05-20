@@ -792,12 +792,25 @@
       `;
     }
 
-    function connectLobbySocket() {
+    async function connectLobbySocket() {
       // Use native WebSocket (no PartySocket dependency)
       const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const wsHost = window.location.hostname === 'localhost' ? 'localhost:3000' : PARTYKT_HOST;
       const wsPlayerName = document.getElementById('player-name').value || 'Player';
-      const wsUrl = `${wsProtocol}//${wsHost}/?room=${currentRoomCode}&playerId=${currentPlayerId}&playerName=${encodeURIComponent(wsPlayerName)}`;
+
+      // Ensure we have a hand (fetch from API if not already set)
+      if (!currentHand) {
+        try {
+          const hr = await fetch(`${API_URL}/api/draw/hand?lang=${currentLang}`);
+          if (hr.ok) {
+            const hd = await hr.json();
+            currentHand = hd.hand;
+          }
+        } catch (_) { currentHand = { race: '', weapon: '', abilities: ['', '', ''], entity: '' }; }
+      }
+
+      const handParam = currentHand ? '&hand=' + btoa(JSON.stringify(currentHand)) : '';
+      const wsUrl = `${wsProtocol}//${wsHost}/?room=${currentRoomCode}&playerId=${currentPlayerId}&playerName=${encodeURIComponent(wsPlayerName)}${handParam}`;
 
       if (lobbySocket) {
         lobbySocket.close();

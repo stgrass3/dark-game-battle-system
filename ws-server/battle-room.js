@@ -56,21 +56,23 @@ class BattleRoom {
         try { send(conn, JSON.stringify({ type: 'error', code, message })); } catch (_) {}
     }
 
-    onConnect(conn, playerId, playerName, allConnections) {
-        // Tag connection with player info
+    onConnect(conn, playerId, playerName, playerHand, allConnections) {
+        // Tag connection with player info + hand
         conn._playerId = playerId;
         conn._playerName = playerName;
         conn._roomId = this.roomId;
+        conn._playerHand = playerHand || makeEmptyHand();
 
-        // Assign player to slot (fresh — always start empty)
+        // Assign player to slot
         const alreadyAssigned = this.state.players.some(p => p?.id === playerId);
         if (!alreadyAssigned) {
+            const hand = playerHand || makeEmptyHand();
             if (!this.state.players[0]?.id) {
-                this.state.players[0] = { id: playerId, name: playerName, hand: makeEmptyHand() };
+                this.state.players[0] = { id: playerId, name: playerName, hand };
                 this.hostId = playerId;
                 this.state.hostId = playerId;
             } else if (!this.state.players[1]) {
-                this.state.players[1] = { id: playerId, name: playerName, hand: makeEmptyHand() };
+                this.state.players[1] = { id: playerId, name: playerName, hand };
                 this.state.phase = 'ready';
             } else {
                 // Room full — send error but don't crash

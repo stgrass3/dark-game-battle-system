@@ -27,6 +27,11 @@ wss.on('connection', (ws, req) => {
     const playerId = url.searchParams.get('playerId') || '';
     const playerName = url.searchParams.get('playerName') || '';
     const roomId = url.searchParams.get('room') || '';
+    const handParam = url.searchParams.get('hand') || '';
+    let playerHand = null;
+    if (handParam) {
+        try { playerHand = JSON.parse(Buffer.from(handParam, 'base64').toString('utf8')); } catch (_) {}
+    }
 
     if (!roomId || !playerId) {
         ws.close(1008, 'Missing room or playerId');
@@ -41,7 +46,7 @@ wss.on('connection', (ws, req) => {
 
     // Create/fresh room and register player
     const room = getOrCreateRoom(roomId);
-    room.onConnect(ws, playerId, playerName, allConnections);
+    room.onConnect(ws, playerId, playerName, playerHand, allConnections);
 
     ws.on('message', (data) => {
         const room = rooms.get(ws._roomId);
