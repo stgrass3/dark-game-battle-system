@@ -580,12 +580,11 @@
   <div class="kicked-notification" id="kicked-notification"></div>
   <div class="room-full-notification" id="room-full-notification"></div>
 
-  <script>
+  <script type="module">
     // Load PartySocket as ES module and expose globally
-    (async function () {
-      const mod = await import('https://unpkg.com/partysocket@1.0.2/dist/index.js');
-      window.PartySocket = mod.default || mod.PartySocket;
-    })();
+    import('https://unpkg.com/partysocket@1.0.2/dist/index.js')
+      .then(mod => { window.PartySocket = mod.default || mod.PartySocket; })
+      .catch(e => console.error('PartySocket load failed:', e));
   </script>
   <script>
     const API_URL = ''; // empty = same origin (works on Vercel AND localhost)

@@ -970,12 +970,10 @@
 
     <a href="rules.html" class="rules-link" data-i18n="rules">規則 / RULES</a>
 
-    <script>
-    // Load PartySocket as ES module and expose globally
-    (async function () {
-      const mod = await import('https://unpkg.com/partysocket@1.0.2/dist/index.js');
-      window.PartySocket = mod.default || mod.PartySocket;
-    })();
+    <script type="module">
+    import('https://unpkg.com/partysocket@1.0.2/dist/index.js')
+      .then(mod => { window.PartySocket = mod.default || mod.PartySocket; })
+      .catch(e => console.error('PartySocket load failed:', e));
   </script>
     <script>
         const API_URL = '';
